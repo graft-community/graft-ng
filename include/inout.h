@@ -223,7 +223,7 @@ namespace graft
         InHttp& operator = (const InHttp&) = default;
         InHttp& operator = (InHttp&&) = default;
         ~InHttp() = default;
-        InHttp(const http_message& hm, const std::string& host_) : InOutHttpBase(hm, host_)
+        InHttp(const http_message& hm, const std::string& host_) : InOutHttpBase(hm, host_), port()
         { }
 
         /*!
@@ -313,6 +313,9 @@ namespace graft
         {
             return body;
         }
+
+    public:
+        uint16_t port;
     };
 
     using Input = InHttp;
