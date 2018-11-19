@@ -145,7 +145,7 @@ void invoke_error_http(const char* url, const char* error_text, TaskManager& tas
 
 }
 
-typedef tp::StrandImpl<tp::FixedFunction<void(), sizeof(GJPtr)>, tp::MPMCBoundedQueue> StrandX;
+using StrandX = tp::StrandImpl<tp::FixedFunction<void(), sizeof(GJPtr)>, tp::MPMCBoundedQueue>;
 
 struct WalletManager::WalletHolder
 {

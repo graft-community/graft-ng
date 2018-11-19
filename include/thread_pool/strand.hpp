@@ -21,7 +21,7 @@ template <typename Task, template<typename> class Queue>
 class StrandImpl
 {
 public:
-    typedef ThreadPoolImpl<Task, Queue> ThreadPool;
+    using ThreadPool = ThreadPoolImpl<Task, Queue>;
 
     /// Constructor
     ///

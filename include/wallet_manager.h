@@ -23,8 +23,8 @@ namespace graft
 class WalletManager
 {
 public:
-    typedef std::string WalletId;
-    typedef std::string Url;
+    using WalletId = std::string;
+    using Url = std::string;
 
     struct TransferDestination
     {
@@ -35,7 +35,7 @@ public:
         : address(in_address), amount(in_amount) {}
     };
 
-    typedef std::vector<TransferDestination> TransferDestinationArray;
+    using TransferDestinationArray = std::vector<TransferDestination>;
 
     // Constructors / destructor
     WalletManager(TaskManager& task_manager, bool testnet = false);
@@ -60,7 +60,7 @@ public:
 
 private:
     struct WalletHolder;
-    typedef std::shared_ptr<WalletHolder> WalletPtr;
+    using WalletPtr = std::shared_ptr<WalletHolder>;
 
 private:
     // Creates new wallet
