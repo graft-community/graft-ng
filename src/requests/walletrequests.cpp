@@ -8,7 +8,7 @@
 namespace
 {
 
-const char* WEBHOOK_CALLBACK_HEADER_TAG = "Callback";
+const char* WEBHOOK_CALLBACK_HEADER_TAG = "X-Callback";
 
 std::string getCallbackString(const graft::Input& input)
 {
@@ -21,12 +21,16 @@ std::string getCallbackString(const graft::Input& input)
 
         const std::string& url = header.second;
 
-        if (url.find("http") == 0) //general case - remote host exists
+        static const char* REMOTE_HOST_PATTERN = "0.0.0.0";
+
+        size_t replacement_pos = url.find(REMOTE_HOST_PATTERN);
+
+        if (replacement_pos == std::string::npos) //general case - remote host exists
             return url;
 
-        std::string full_url = "http://" + input.remote_host + ":" + url;
+        std::string full_url = url;
 
-        return full_url;
+        return full_url.replace(replacement_pos, strlen(REMOTE_HOST_PATTERN), input.remote_host);
     }
 
     return std::string();
