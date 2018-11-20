@@ -309,17 +309,6 @@ void HttpConnectionManager::ev_handler_http(mg_connection *client, int ev, void 
             mg_str& body = hm->body;
             prms.input = Input(*hm, client_host(client));
 
-            for(int i = 0; i < MG_MAX_HTTP_HEADERS; ++i)
-            {
-                const mg_str& h_n = hm->header_names[i];
-                const mg_str& h_v = hm->header_values[i];
-
-                if(h_n.p == nullptr)
-                    break;
-
-                prms.input.headers.push_back({std::string(h_n.p, h_n.len), std::string(h_v.p, h_v.len)});
-            }
-
             prms.input.port = remote_port;
 
             LOG_PRINT_CLN(2,client,"Matching Route found; body = " << std::string(body.p, body.len));
