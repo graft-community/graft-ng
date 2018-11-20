@@ -30,7 +30,7 @@ std::string getCallbackString(const graft::Input& input)
 
         std::string full_url = url;
 
-        return full_url.replace(replacement_pos, strlen(REMOTE_HOST_PATTERN), input.remote_host);
+        return full_url.replace(replacement_pos, strlen(REMOTE_HOST_PATTERN), input.host);
     }
 
     return std::string();

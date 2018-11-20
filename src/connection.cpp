@@ -320,7 +320,6 @@ void HttpConnectionManager::ev_handler_http(mg_connection *client, int ev, void 
                 prms.input.headers.push_back({std::string(h_n.p, h_n.len), std::string(h_v.p, h_v.len)});
             }
 
-            prms.input.host = remote_address_host_str;
             prms.input.port = remote_port;
 
             LOG_PRINT_CLN(2,client,"Matching Route found; body = " << std::string(body.p, body.len));
