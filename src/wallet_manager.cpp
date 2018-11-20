@@ -433,15 +433,17 @@ void WalletManager::requestBalance(Context& context, const WalletId& wallet_id, 
 
     rapidjson::Document json;
     json.SetObject();
-    rapidjson::Value value(rapidjson::kNumberType);
+    rapidjson::Value value(rapidjson::kStringType), result_value(rapidjson::kNumberType);
 
-    value.SetInt(0);
-    json.AddMember("Result", value, json.GetAllocator());
+    result_value.SetInt(0);
+    json.AddMember("Result", result_value, json.GetAllocator());
 
-    value.SetDouble(wallet.balance() / double(ATOMS)); //todo: is conversion to double correct for currency?
+    std::string balance = std::to_string(wallet.balance()), unlocked_balance = std::to_string(wallet.unlocked_balance());
+
+    value.SetString(balance.c_str(), balance.length());
     json.AddMember("Balance", value, json.GetAllocator());
 
-    value.SetDouble(wallet.unlocked_balance() / double(ATOMS)); //todo: is conversion to double correct for currency?
+    value.SetString(unlocked_balance.c_str(), unlocked_balance.length());
     json.AddMember("UnlockedBalance", value, json.GetAllocator());
 
     rapidjson::StringBuffer buffer;
