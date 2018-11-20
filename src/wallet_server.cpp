@@ -94,7 +94,7 @@ void WalletServer::initWalletManager()
 {
     assert(m_looper);
 
-    m_walletManager.reset(new WalletManager(*m_looper, m_configEx.testnet));
+    m_walletManager = std::make_unique<WalletManager>(*m_looper, m_configEx.testnet);
 }
 
 void WalletServer::initRouters()
