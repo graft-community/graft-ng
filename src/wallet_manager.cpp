@@ -17,6 +17,7 @@ namespace
 const unsigned int WALLET_MEMORY_CACHE_TTL_SECONDS       = 10 * 60; //TODO: move to config
 const unsigned int WALLET_TRANSACTIONS_QUEUE_SIZE        = 256; //TODO: move to config
 const uint64_t     WALLET_DISK_CACHE_FLUSH_DELAY_SECONDS = 3600; //TODO: move to config
+const char*        WALLETS_DIR_PREFIX                    = "wallets"; //TODO: move to config
 
 /// Holder for lamba to be used inside FixedFunction
 struct FixedFunctionWrapper
@@ -141,6 +142,14 @@ void invoke_error_http(const char* url, const char* error_text, TaskManager& tas
   callback.result.body = "{'Error':'" + std::string(error_text) + "','Result':-1}";
 
   callback.invoke(task_manager);
+}
+
+void create_directories(const std::string& file_name)
+{
+  boost::filesystem::path path(file_name);
+  boost::filesystem::path dir = path.parent_path();
+
+  boost::filesystem::create_directories(dir);
 }
 
 }
@@ -269,7 +278,12 @@ void WalletManager::runAsync(Context& context, const Url& callback_url, const Fn
 
 std::string WalletManager::getWalletCacheFileName(const WalletId& id)
 {
-  return id + ".cache";
+  static const size_t WALLET_CACHE_FILE_NAME_PREFIX_SIZE = 2;
+
+  if (id.size () < WALLET_CACHE_FILE_NAME_PREFIX_SIZE)
+    return std::string(WALLETS_DIR_PREFIX) + "/" + id + ".cache";
+
+  return std::string(WALLETS_DIR_PREFIX) + "/" + id.substr(0, WALLET_CACHE_FILE_NAME_PREFIX_SIZE) + "/" + id + ".cache";
 }
 
 void WalletManager::createAccount(Context& context, const std::string& password, const std::string& language, const Url& callback_url)
@@ -298,7 +312,11 @@ void WalletManager::createAccount(Context& context, const std::string& password,
     LOG_PRINT_L1("Seed is '" << seed << "'");
     LOG_PRINT_L1("AccountData is '" << account_data << "'");
 
-    wallet->wallet.store_cache(getWalletCacheFileName(public_address));
+    std::string cache_file_name = getWalletCacheFileName(public_address);
+
+    create_directories(cache_file_name);
+
+    wallet->wallet.store_cache(cache_file_name);
 
     std::string wallet_id = getContextWalletId(public_address);
 
@@ -369,7 +387,11 @@ void WalletManager::restoreAccount(Context& context, const std::string& password
     if (!wallet->wallet.get_seed(seed))
       throw std::runtime_error("Can't get seed for new wallet");
 
-    wallet->wallet.load_cache(getWalletCacheFileName(public_address));
+    std::string cache_file_name = getWalletCacheFileName(public_address);
+
+    create_directories(cache_file_name);
+
+    wallet->wallet.store_cache(cache_file_name);
 
     std::string wallet_id = getContextWalletId(public_address);
 
