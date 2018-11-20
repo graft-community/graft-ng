@@ -31,13 +31,6 @@ void WalletServer::registerWalletRequests(ConnectionManager& httpcm)
 
 void WalletServer::setHttpRouters(ConnectionManager& httpcm)
 {
-    Router dapi_router("/dapi/v2.0");
-    auto http_test = [](const Router::vars_t&, const Input&, Context&, Output&)->Status
-    {
-        std::cout << "blah-blah" << std::endl;
-        return Status::Ok;
-    };
-
     Router health_router;
     graft::registerHealthcheckRequests(health_router);
     httpcm.addRouter(health_router);
