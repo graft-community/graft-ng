@@ -86,6 +86,7 @@ bool WalletServer::initConfigOption(int argc, const char** argv, ConfigOpts& con
 void WalletServer::initWalletManager()
 {
     assert(m_looper);
+    assert(!m_walletManager);
 
     m_walletManager = std::make_unique<WalletManager>(*m_looper, m_configEx.testnet);
 }
