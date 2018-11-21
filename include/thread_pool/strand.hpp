@@ -58,7 +58,6 @@ private:
         StrandImpl* m_StrandImpl;
     };
 
-private:
     ThreadPool& m_thread_pool;
     Queue<Task> m_queue;
     std::atomic<size_t> m_deferred_calls_count;

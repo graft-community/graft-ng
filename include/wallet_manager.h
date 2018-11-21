@@ -62,7 +62,6 @@ private:
     struct WalletHolder;
     using WalletPtr = std::shared_ptr<WalletHolder>;
 
-private:
     // Creates new wallet
     WalletPtr createWallet(Context&);
 
@@ -80,7 +79,6 @@ private:
     // Generate wallet cache file name from ID
     static std::string getWalletCacheFileName(const WalletId&);
 
-private:
     bool         m_testnet;
     TaskManager& m_task_manager;
 };

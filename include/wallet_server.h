@@ -8,12 +8,6 @@ namespace graft {
 /// Wallet service
 class WalletServer: public GraftServer
 {
-    struct ConfigOptsEx : public ConfigOpts
-    {
-        // testnet flag
-        bool testnet;
-    };
-
 public:
     WalletServer();
     ~WalletServer();
@@ -28,14 +22,19 @@ protected:
     virtual bool initConfigOption(int argc, const char** argv, ConfigOpts& configOpts) override;
     virtual void initRouters() override;
 
-private:    
+private:
+    struct ConfigOptsEx : public ConfigOpts
+    {
+        // testnet flag
+        bool testnet;
+    };
+
     void initWalletManager();
     void startPeriodicTasks();
     void setHttpRouters(ConnectionManager& httpcm);
     void registerWalletRequests(ConnectionManager& httpcm);
     void flushWalletDiskCaches();
 
-private:
     ConfigOptsEx m_configEx;
     std::unique_ptr<WalletManager> m_walletManager;
 };
