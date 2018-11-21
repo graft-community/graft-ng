@@ -40,9 +40,9 @@ namespace
 
 void taskHandler(int value, std::atomic<int>& current_value)
 {
-  EXPECT_GT(value, current_value.load(std::memory_order_relaxed));
+  EXPECT_GT(value, current_value.load(std::memory_order_acquire));
 
-  current_value.store(value);
+  current_value.store(value, std::memory_order_release);
 
   std::this_thread::sleep_for(std::chrono::milliseconds(250));
 }
@@ -61,8 +61,8 @@ TEST(StrandTest, basic)
     for (int i=0; i<max_value; i++)
         strand.post(std::bind(&taskHandler, i+1, std::ref(value)));
 
-    while (value.load(std::memory_order_relaxed) < max_value)
+    while (value.load(std::memory_order_acquire) < max_value)
         std::this_thread::sleep_for(std::chrono::milliseconds(250));
 
-    EXPECT_EQ(value.load(std::memory_order_relaxed), max_value);
+    EXPECT_EQ(value.load(std::memory_order_acquire), max_value);
 }

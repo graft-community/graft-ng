@@ -84,7 +84,7 @@ void StrandImpl<Task, Queue>::post(Handler&& handler, bool to_any_queue)
 template <typename Task, template<typename> class Queue>
 void StrandImpl<Task, Queue>::invokeCall()
 {
-    if (m_deferred_calls_count.fetch_add(1, std::memory_order_relaxed))
+    if (m_deferred_calls_count.fetch_add(1, std::memory_order_acq_rel))
         return;
 
     Task handler;
@@ -102,7 +102,7 @@ void StrandImpl<Task, Queue>::invokeCall()
             // suppress all exceptions
         }           
         
-        bool has_deferred_calls = m_deferred_calls_count.fetch_sub(1, std::memory_order_relaxed) > 1;
+        bool has_deferred_calls = m_deferred_calls_count.fetch_sub(1, std::memory_order_acq_rel) > 1;
 
         if (!has_deferred_calls)
           break;
