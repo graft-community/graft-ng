@@ -528,7 +528,7 @@ void WalletManager::prepareTransfer(Context& context, const WalletId& wallet_id,
 namespace
 {
 
-std::vector<std::string> getAllMatchingFiles(const char* dir, const char* name_re)
+std::vector<std::string> getAllExpiredFiles(const char* dir, const char* name_re)
 {
   time_t now;
 
@@ -570,7 +570,7 @@ void WalletManager::flushDiskCaches()
 {
   LOG_PRINT_L1("Flush disk caches");
 
-  std::vector<std::string> cache_files = getAllMatchingFiles(".", ".*\\.cache");
+  std::vector<std::string> cache_files = getAllExpiredFiles(".", ".*\\.cache");
 
   for (const std::string& cache_file_name : cache_files)
   {
