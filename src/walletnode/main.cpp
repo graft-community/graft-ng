@@ -49,19 +49,15 @@ int main(int argc, const char** argv)
 
     try
     {
+        //TODO: return result from server
         graft::wnd::WalletServer server;
         bool res = server.run(argc, argv);
         if(!res) return -2;
-    } catch (const graft::exit_error& e) {
-        std::cerr << "The program is terminated because of error: " << e.what() << std::endl;
-        return -1;
     } catch (const std::exception & e) {
         std::cerr << "Exception thrown: " << e.what() << std::endl;
-        throw;
         return -1;
     } catch(...) {
         std::cerr << "Exception of unknown type!\n";
-        throw;
         return -1;
     }
 
