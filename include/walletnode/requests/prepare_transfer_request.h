@@ -9,16 +9,16 @@ class Context;
 
 namespace wnd {
 
-GRAFT_DEFINE_IO_STRUCT_INITED(WalletTransferDestination,
-                       (std::string, Address, std::string()),
-                       (std::string, Amount,  std::string())
+GRAFT_DEFINE_IO_STRUCT(WalletTransferDestination,
+                       (std::string, Address),
+                       (std::string, Amount)
                        );
 
-GRAFT_DEFINE_IO_STRUCT_INITED(WalletPrepareTransferRequest,
-    (std::string,                            WalletId,     std::string()),
-    (std::string,                            Account,      std::string()),
-    (std::string,                            Password,     std::string()),
-    (std::vector<WalletTransferDestination>, Destinations, std::vector<WalletTransferDestination>())
+GRAFT_DEFINE_IO_STRUCT(WalletPrepareTransferRequest,
+    (std::string,                            WalletId),
+    (std::string,                            Account),
+    (std::string,                            Password),
+    (std::vector<WalletTransferDestination>, Destinations)
 );
 
 GRAFT_DEFINE_JSON_RPC_REQUEST(WalletPrepareTransferRequestJsonRpc, WalletPrepareTransferRequest)

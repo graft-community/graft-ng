@@ -60,8 +60,6 @@ Status walletCreateAccountRequestHandler
 
     WalletCreateAccountResponse out;
 
-    out.Result = 0;
-
     output.load(out);
 
     return Status::Ok;
@@ -84,8 +82,6 @@ Status walletRestoreAccountRequestHandler
 
     WalletRestoreAccountResponse out;
 
-    out.Result = 0;
-
     output.load(out);
 
     return Status::Ok;
@@ -107,8 +103,6 @@ Status walletBalanceRequestHandler
     wallet_manager.requestBalance(context, request.params.WalletId, request.params.Account, request.params.Password, getCallbackString(input));
 
     WalletBalanceResponse out;
-
-    out.Result = 0;
 
     output.load(out);
 
@@ -138,8 +132,6 @@ Status walletPrepareTransferRequestHandler
     wallet_manager.prepareTransfer(context, request.params.WalletId, request.params.Account, request.params.Password, destinations, getCallbackString(input));
 
     WalletPrepareTransferResponse out;
-
-    out.Result = 0;
 
     output.load(out);
 

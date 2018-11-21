@@ -9,10 +9,10 @@ class Context;
 
 namespace wnd {
 
-GRAFT_DEFINE_IO_STRUCT_INITED(WalletBalanceRequest,
-    (std::string, WalletId, std::string()),
-    (std::string, Account,  std::string()),
-    (std::string, Password, std::string())
+GRAFT_DEFINE_IO_STRUCT(WalletBalanceRequest,
+    (std::string, WalletId),
+    (std::string, Account),
+    (std::string, Password)
 );
 
 GRAFT_DEFINE_JSON_RPC_REQUEST(WalletBalanceRequestJsonRpc, WalletBalanceRequest)
