@@ -50,12 +50,12 @@ private:
     class StrandImplHandler
     {
     public:
-        StrandImplHandler(StrandImpl& StrandImpl) : m_StrandImpl(&StrandImpl) {}
+        StrandImplHandler(StrandImpl& StrandImpl) : m_strandImpl(&StrandImpl) {}
 
-        void operator ()() const { m_StrandImpl->invokeCall(); }
+        void operator ()() const { m_strandImpl->invokeCall(); }
 
     private:
-        StrandImpl* m_StrandImpl;
+        StrandImpl* m_strandImpl;
     };
 
     ThreadPool& m_thread_pool;
