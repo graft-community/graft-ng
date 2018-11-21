@@ -22,6 +22,17 @@ GRAFT_DEFINE_IO_STRUCT_INITED(WalletRestoreAccountResponse,
 
 GRAFT_DEFINE_JSON_RPC_REQUEST(WalletRestoreAccountResponseJsonRpc, WalletRestoreAccountResponse)
 
+GRAFT_DEFINE_IO_STRUCT(WalletRestoreAccountCallbackRequest,
+    (int,         Result),
+    (std::string, WalletId),
+    (std::string, Address),
+    (std::string, ViewKey),
+    (std::string, Account),
+    (std::string, Seed)
+);
+
+GRAFT_DEFINE_JSON_RPC_REQUEST(WalletRestoreAccountCallbackRequestJsonRpc, WalletRestoreAccountCallbackRequest)
+
 }
 
 }

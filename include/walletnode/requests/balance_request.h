@@ -23,6 +23,14 @@ GRAFT_DEFINE_IO_STRUCT_INITED(WalletBalanceResponse,
 
 GRAFT_DEFINE_JSON_RPC_REQUEST(WalletBalanceResponseJsonRpc, WalletBalanceResponse)
 
+GRAFT_DEFINE_IO_STRUCT(WalletBalanceCallbackRequest,
+    (int,         Result),
+    (std::string, Balance),
+    (std::string, UnlockedBalance)
+);
+
+GRAFT_DEFINE_JSON_RPC_REQUEST(WalletBalanceCallbackRequestJsonRpc, WalletBalanceCallbackRequest)
+
 }
 
 }

@@ -29,6 +29,14 @@ GRAFT_DEFINE_IO_STRUCT_INITED(WalletPrepareTransferResponse,
 
 GRAFT_DEFINE_JSON_RPC_REQUEST(WalletPrepareTransferJsonRpc, WalletPrepareTransferResponse)
 
+GRAFT_DEFINE_IO_STRUCT(WalletPrepareTransferCallbackRequest,
+    (int,                      Result),
+    (std::string,              Fee),
+    (std::vector<std::string>, Transactions)
+);
+
+GRAFT_DEFINE_JSON_RPC_REQUEST(WalletPrepareTransferCallbackRequestJsonRpc, WalletPrepareTransferCallbackRequest)
+
 }
 
 }

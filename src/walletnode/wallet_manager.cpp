@@ -1,9 +1,11 @@
 #include "walletnode/wallet_manager.h"
 #include "inout.h"
 
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/document.h"
-#include "rapidjson/writer.h"
+#include "walletnode/requests/balance_request.h"
+#include "walletnode/requests/create_account_request.h"
+#include "walletnode/requests/restore_account_request.h"
+#include "walletnode/requests/prepare_transfer_request.h"
+#include "requestdefines.h"
 
 #include <mnemonics/electrum-words.h>
 
@@ -323,34 +325,17 @@ void WalletManager::createAccount(Context& context, const std::string& password,
 
     registerWallet(context, wallet_id, wallet);
 
-    rapidjson::Document json;
-    json.SetObject();
-    rapidjson::Value value(rapidjson::kStringType), result_value(rapidjson::kNumberType);
+    WalletCreateAccountCallbackRequest out;
 
-    result_value.SetInt(0);
-    json.AddMember("Result", result_value, json.GetAllocator());
+    out.Result   = 0;
+    out.Address  = public_address;
+    out.ViewKey  = view_key;
+    out.Account  = account_data;
+    out.Seed     = seed;
+    out.WalletId = public_address;
 
-    value.SetString(public_address.c_str(), public_address.length());
-    json.AddMember("Address", value, json.GetAllocator());
+    result.load(out);
 
-    value.SetString(view_key.c_str(), view_key.length());
-    json.AddMember("ViewKey", value, json.GetAllocator());
-
-    value.SetString(account_data.c_str(), account_data.length());
-    json.AddMember("Account", value, json.GetAllocator());
-
-    value.SetString(seed.c_str(), seed.length());
-    json.AddMember("Seed", value, json.GetAllocator());
-
-    value.SetString(public_address.c_str(), public_address.length());
-    json.AddMember("WalletId", value, json.GetAllocator());
-
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    json.Accept(writer);
-
-    result.body = buffer.GetString();
-    
     LOG_PRINT_L1("Wallet '" << public_address << "' has been successfully loaded (callback=" << callback_url << ")");
   });
 }
@@ -398,30 +383,16 @@ void WalletManager::restoreAccount(Context& context, const std::string& password
 
     registerWallet(context, wallet_id, wallet);    
 
-    rapidjson::Document json;
-    json.SetObject();
-    rapidjson::Value value(rapidjson::kStringType), result_value(rapidjson::kNumberType);
+    WalletRestoreAccountCallbackRequest out;
 
-    result_value.SetInt(0);
-    json.AddMember("Result", result_value, json.GetAllocator());
+    out.Result   = 0;
+    out.Address  = public_address;
+    out.ViewKey  = view_key;
+    out.Account  = account_data;
+    out.Seed     = seed;
+    out.WalletId = public_address;
 
-    value.SetString(public_address.c_str(), public_address.length());
-    json.AddMember("Address", value, json.GetAllocator());
-
-    value.SetString(view_key.c_str(), view_key.length());
-    json.AddMember("ViewKey", value, json.GetAllocator());
-
-    value.SetString(account_data.c_str(), account_data.length());
-    json.AddMember("Account", value, json.GetAllocator());
-
-    value.SetString(seed.c_str(), seed.length());
-    json.AddMember("Seed", value, json.GetAllocator());
-
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    json.Accept(writer);
-
-    result.body = buffer.GetString();
+    result.load(out);
 
     LOG_PRINT_L1("Wallet '" << public_address << "' has been successfully restored (callback=" << callback_url << ")");
   });
@@ -432,26 +403,13 @@ void WalletManager::requestBalance(Context& context, const WalletId& wallet_id, 
   runAsyncForWallet(context, wallet_id, account_data, password, callback_url, [this, wallet_id, callback_url](tools::GraftWallet& wallet, OutHttp& result) {
     LOG_PRINT_L1("Request balance for wallet '" << wallet_id << "'(callback=" << callback_url << ")");
 
-    rapidjson::Document json;
-    json.SetObject();
-    rapidjson::Value value(rapidjson::kStringType), result_value(rapidjson::kNumberType);
+    WalletBalanceCallbackRequest out;
 
-    result_value.SetInt(0);
-    json.AddMember("Result", result_value, json.GetAllocator());
+    out.Result          = 0;
+    out.Balance         = std::to_string(wallet.balance());
+    out.UnlockedBalance = std::to_string(wallet.unlocked_balance());
 
-    std::string balance = std::to_string(wallet.balance()), unlocked_balance = std::to_string(wallet.unlocked_balance());
-
-    value.SetString(balance.c_str(), balance.length());
-    json.AddMember("Balance", value, json.GetAllocator());
-
-    value.SetString(unlocked_balance.c_str(), unlocked_balance.length());
-    json.AddMember("UnlockedBalance", value, json.GetAllocator());
-
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    json.Accept(writer);
-
-    result.body = buffer.GetString();    
+    result.load(out);
   });
 }
 
@@ -485,43 +443,28 @@ void WalletManager::prepareTransfer(Context& context, const WalletId& wallet_id,
 
     std::vector<tools::GraftWallet::pending_tx> transactions = wallet.create_transactions(destinations, fake_outs_count, unlock_time, priority, extra, trusted_daemon);
 
-    rapidjson::Document json;
-    json.SetObject();
+    std::vector<std::string> serialized_transactions;
 
-    rapidjson::Value json_transactions(rapidjson::kArrayType);
+    serialized_transactions.reserve(transactions.size());
 
     uint64_t total_fee = 0;
 
     for (const tools::GraftWallet::pending_tx& transaction : transactions)
     {
-        rapidjson::Value value(rapidjson::kStringType);
-
         std::string serialized_transaction = epee::string_tools::buff_to_hex_nodelimer(cryptonote::tx_to_blob(transaction.tx));
 
-        value.SetString(serialized_transaction.c_str(), serialized_transaction.length());
-
-        json_transactions.PushBack(value, json.GetAllocator());
+        serialized_transactions.push_back(serialized_transaction);
 
         total_fee += transaction.fee;
     }
 
-    json.AddMember("Transactions", json_transactions, json.GetAllocator());
+    WalletPrepareTransferCallbackRequest out;
 
-    std::string fee_string = std::to_string(total_fee);
+    out.Result       = 0;
+    out.Fee          = std::to_string(total_fee);
+    out.Transactions = std::move(serialized_transactions);
 
-    rapidjson::Value value(rapidjson::kStringType), result_value(rapidjson::kNumberType);
-
-    result_value.SetInt(0);
-    json.AddMember("Result", result_value, json.GetAllocator());
-
-    value.SetString(fee_string.c_str(), fee_string.size());
-    json.AddMember("Fee", value, json.GetAllocator());
-
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    json.Accept(writer);
-
-    result.body = buffer.GetString();    
+    result.load(out);
   });
 }
 
