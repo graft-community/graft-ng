@@ -1,4 +1,4 @@
-#include "wallet_manager.h"
+#include "walletnode/wallet_manager.h"
 #include "inout.h"
 
 #include "rapidjson/stringbuffer.h"
@@ -10,6 +10,7 @@
 #include <wallet/graft_wallet.h>
 
 using namespace graft;
+using namespace graft::wnd;
 
 namespace
 {

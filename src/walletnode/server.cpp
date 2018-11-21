@@ -1,4 +1,4 @@
-#include "wallet_server.h"
+#include "walletnode/server.h"
 #include "backtrace.h"
 #include "requests.h"
 #include "requestdefines.h"
@@ -12,6 +12,8 @@ namespace po = boost::program_options;
 
 namespace graft {
 
+namespace wnd {
+
 WalletServer::WalletServer()
 {
 }
@@ -24,7 +26,7 @@ void WalletServer::registerWalletRequests(ConnectionManager& httpcm)
 {
     Router router;
 
-    graft::registerWalletRequests(router, *m_walletManager);
+    graft::wnd::registerWalletRequests(router, *m_walletManager);
 
     httpcm.addRouter(router);
 }
@@ -116,4 +118,5 @@ void WalletServer::startPeriodicTasks()
         std::chrono::milliseconds(WALLET_DISK_CACHES_UPDATE_TIME_MS), std::chrono::milliseconds(1));
 }
 
+}//namespace wnd
 }//namespace graft

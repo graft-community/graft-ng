@@ -82,12 +82,12 @@ set(SUPERNODE_SOURCES
     ${PROJECT_SOURCE_DIR}/src/supernode/requests/sale_status.cpp
     ${PROJECT_SOURCE_DIR}/src/supernode/requests/send_raw_tx.cpp
     ${PROJECT_SOURCE_DIR}/src/supernode/requests/send_supernode_announce.cpp
-    ${PROJECT_SOURCE_DIR}/src/requests/walletrequests.cpp
     ${PROJECT_SOURCE_DIR}/src/rta/DaemonRpcClient.cpp
     ${PROJECT_SOURCE_DIR}/src/rta/fullsupernodelist.cpp
     ${PROJECT_SOURCE_DIR}/src/rta/supernode.cpp
-    ${PROJECT_SOURCE_DIR}/src/wallet_manager.cpp
-    ${PROJECT_SOURCE_DIR}/src/wallet_server.cpp
+    ${PROJECT_SOURCE_DIR}/src/walletnode/requests/wallet_requests.cpp
+    ${PROJECT_SOURCE_DIR}/src/walletnode/wallet_manager.cpp
+    ${PROJECT_SOURCE_DIR}/src/walletnode/server.cpp
     )
 
 set(CRYPTONODE_INCLUDE_DIRS
@@ -248,7 +248,7 @@ add_dependencies(supernode graft libr3 cryptonode)
 ### wallet_server
 add_executable(wallet_server
     ${SUPERNODE_SOURCES}
-    ${PROJECT_SOURCE_DIR}/src/wallet_server_main.cpp
+    ${PROJECT_SOURCE_DIR}/src/walletnode/main.cpp
     )
 
 target_include_directories(wallet_server PRIVATE

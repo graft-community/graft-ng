@@ -1,8 +1,11 @@
-#include "wallet_server.h"
+#include "walletnode/server.h"
 #include "backtrace.h"
 #include "graft_exception.h"
 
 namespace graft
+{
+
+namespace wnd
 {
 
 std::terminate_handler prev_terminate = nullptr;
@@ -37,15 +40,16 @@ void terminate()
     prev_terminate();
 }
 
+} //namespace wnd
 } //namespace graft
 
 int main(int argc, const char** argv)
 {
-    graft::prev_terminate = std::set_terminate( graft::terminate );
+    graft::wnd::prev_terminate = std::set_terminate( graft::wnd::terminate );
 
     try
     {
-        graft::WalletServer server;
+        graft::wnd::WalletServer server;
         bool res = server.run(argc, argv);
         if(!res) return -2;
     } catch (const graft::exit_error& e) {

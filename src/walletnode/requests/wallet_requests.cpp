@@ -1,9 +1,9 @@
-#include "requests/walletbalancerequest.h"
-#include "requests/walletcreateaccountrequest.h"
-#include "requests/walletrestoreaccountrequest.h"
-#include "requests/walletpreparetransferrequest.h"
+#include "walletnode/requests/balance_request.h"
+#include "walletnode/requests/create_account_request.h"
+#include "walletnode/requests/restore_account_request.h"
+#include "walletnode/requests/prepare_transfer_request.h"
 #include "requestdefines.h"
-#include "wallet_manager.h"
+#include "walletnode/wallet_manager.h"
 
 namespace
 {
@@ -39,6 +39,9 @@ std::string getCallbackString(const graft::Input& input)
 }
 
 namespace graft {
+
+namespace wnd
+{
 
 Status walletCreateAccountRequestHandler
  (const Router::vars_t& vars, 
@@ -171,6 +174,8 @@ void registerWalletRequests(graft::Router& router, WalletManager& wallet_manager
     registerWalletRequest(router, wallet_manager, "/api/restore_account", METHOD_GET, walletRestoreAccountRequestHandler);
     registerWalletRequest(router, wallet_manager, "/api/wallet_balance", METHOD_GET, walletBalanceRequestHandler);
     registerWalletRequest(router, wallet_manager, "/api/prepare_transfer", METHOD_GET, walletPrepareTransferRequestHandler);
+}
+
 }
 
 }

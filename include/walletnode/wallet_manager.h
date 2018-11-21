@@ -19,6 +19,9 @@ class GraftWallet;
 namespace graft
 {
 
+namespace wnd
+{
+
 /// Wallet manager
 class WalletManager
 {
@@ -82,5 +85,7 @@ private:
     bool         m_testnet;
     TaskManager& m_task_manager;
 };
+
+}//namespace wnd
 
 }//namespace graft

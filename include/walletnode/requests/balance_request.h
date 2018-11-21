@@ -7,6 +7,8 @@ namespace graft {
 
 class Context;
 
+namespace wnd {
+
 GRAFT_DEFINE_IO_STRUCT_INITED(WalletBalanceRequest,
     (std::string, WalletId, std::string()),
     (std::string, Account,  std::string()),
@@ -20,5 +22,7 @@ GRAFT_DEFINE_IO_STRUCT_INITED(WalletBalanceResponse,
 );
 
 GRAFT_DEFINE_JSON_RPC_REQUEST(WalletBalanceResponseJsonRpc, WalletBalanceResponse)
+
+}
 
 }

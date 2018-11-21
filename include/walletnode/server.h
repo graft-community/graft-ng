@@ -1,9 +1,11 @@
 #pragma once
 
-#include "server.h"
-#include "wallet_manager.h"
+#include "../server.h"
+#include "walletnode/wallet_manager.h"
 
 namespace graft {
+
+namespace wnd {
 
 /// Wallet service
 class WalletServer: public GraftServer
@@ -39,4 +41,5 @@ private:
     std::unique_ptr<WalletManager> m_walletManager;
 };
 
+}//namespace wnd
 }//namespace graft
