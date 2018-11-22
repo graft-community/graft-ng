@@ -2,6 +2,7 @@
 #include "walletnode/requests/create_account_request.h"
 #include "walletnode/requests/restore_account_request.h"
 #include "walletnode/requests/prepare_transfer_request.h"
+#include "walletnode/requests/transaction_history_request.h"
 #include "requestdefines.h"
 #include "walletnode/wallet_manager.h"
 
@@ -138,6 +139,28 @@ Status walletPrepareTransferRequestHandler
     return Status::Ok;
 }
 
+Status walletTransactionHistoryRequestHandler
+ (const Router::vars_t& vars, 
+  const graft::Input&   input,
+  graft::Context&       context,
+  WalletManager&        wallet_manager,
+  graft::Output&        output)
+{
+    WalletTransactionHistoryRequestJsonRpc request;
+
+    if (!input.get(request)) {
+        return errorInvalidParams(output);
+    }
+
+    wallet_manager.requestTransactionHistory(context, request.params.WalletId, request.params.Account, request.params.Password, getCallbackString(input));
+
+    WalletTransactionHistoryResponse out;
+
+    output.load(out);
+
+    return Status::Ok;
+}
+
 namespace
 {
 
@@ -166,6 +189,7 @@ void registerWalletRequests(graft::Router& router, WalletManager& wallet_manager
     registerWalletRequest(router, wallet_manager, "/api/restore_account", METHOD_GET, walletRestoreAccountRequestHandler);
     registerWalletRequest(router, wallet_manager, "/api/wallet_balance", METHOD_GET, walletBalanceRequestHandler);
     registerWalletRequest(router, wallet_manager, "/api/prepare_transfer", METHOD_GET, walletPrepareTransferRequestHandler);
+    registerWalletRequest(router, wallet_manager, "/api/transaction_history", METHOD_GET, walletTransactionHistoryRequestHandler);
 }
 
 }

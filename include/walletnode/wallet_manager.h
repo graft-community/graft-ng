@@ -58,6 +58,9 @@ public:
     /// Prepare transfer
     void prepareTransfer(Context&, const WalletId&, const std::string& account_data, const std::string& password, const TransferDestinationArray& destinations, const Url& callback_url = Url());
 
+    /// Request transaction history
+    void requestTransactionHistory(Context&, const WalletId&, const std::string& account_data, const std::string& password, const Url& callback_url = Url());
+
     /// Flush disk caches
     void flushDiskCaches();
 

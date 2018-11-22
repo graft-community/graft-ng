@@ -5,7 +5,10 @@
 #include "walletnode/requests/create_account_request.h"
 #include "walletnode/requests/restore_account_request.h"
 #include "walletnode/requests/prepare_transfer_request.h"
+#include "walletnode/requests/transaction_history_request.h"
 #include "requestdefines.h"
+
+#include "string_tools.h"
 
 #include <mnemonics/electrum-words.h>
 
@@ -463,6 +466,183 @@ void WalletManager::prepareTransfer(Context& context, const WalletId& wallet_id,
     out.Result       = 0;
     out.Fee          = std::to_string(total_fee);
     out.Transactions = std::move(serialized_transactions);
+
+    result.load(out);
+  });
+}
+
+namespace
+{
+
+GRAFT_DEFINE_IO_STRUCT_INITED(Transfer,
+  (uint64_t,    Amount,   0),
+  (std::string, Address,  std::string())
+);
+
+GRAFT_DEFINE_IO_STRUCT_INITED(TransactionInfo,
+  (bool,                  DirectionOut, false),
+  (bool,                  Pending,       false),
+  (bool,                  Failed,        false),
+  (uint64_t,              Amount,        0),
+  (uint64_t,              Fee,           0),
+  (uint64_t,              BlockHeight,   0),
+  (std::string,           Hash,          std::string()),
+  (std::time_t,           Timestamp,     0),
+  (std::string,           PaymentId,     std::string()),
+  (std::vector<Transfer>, Transfers,     std::vector<Transfer>()),
+  (uint64_t,              Confirmations, 0),
+  (uint64_t,              UnlockTime,   0)
+);
+
+GRAFT_DEFINE_IO_STRUCT(TransactionHistory,
+  (std::vector<TransactionInfo>, Transactions)
+);
+
+}
+
+void WalletManager::requestTransactionHistory(Context& context, const WalletId& wallet_id, const std::string& account_data, const std::string& password, const Url& callback_url)
+{
+  runAsyncForWallet(context, wallet_id, account_data, password, callback_url, [this, wallet_id, callback_url](tools::GraftWallet& wallet, OutHttp& result) {
+    LOG_PRINT_L1("Request transaction history for wallet '" << wallet_id << "'(callback=" << callback_url << ")");
+
+    TransactionHistory transaction_history;
+    std::vector<TransactionInfo>& transactions = transaction_history.Transactions;
+
+    uint64_t wallet_height = wallet.get_blockchain_current_height();
+    uint64_t min_height = 0, max_height = (uint64_t)-1;
+
+    std::list<std::pair<crypto::hash, tools::wallet2::payment_details>> in_payments;
+
+    wallet.get_payments(in_payments, min_height, max_height);
+
+    for (std::list<std::pair<crypto::hash, tools::wallet2::payment_details>>::const_iterator it = in_payments.begin(); it != in_payments.end(); ++it)
+    {
+      const tools::wallet2::payment_details& details = it->second;
+      std::string payment_id = epee::string_tools::pod_to_hex(it->first);
+
+      if (payment_id.substr(16).find_first_not_of('0') == std::string::npos)
+        payment_id = payment_id.substr(0,16);
+
+      TransactionInfo info;
+
+      info.PaymentId     = payment_id;
+      info.Amount        = details.m_amount;
+      info.DirectionOut = false;
+      info.Hash          = epee::string_tools::pod_to_hex(details.m_tx_hash);
+      info.BlockHeight   = details.m_block_height;
+      info.Timestamp     = details.m_timestamp;
+      info.Confirmations = wallet_height - details.m_block_height;
+      info.UnlockTime    = details.m_unlock_time;
+
+      transactions.emplace_back(std::move(info));
+    }
+
+    std::list<std::pair<crypto::hash, tools::wallet2::confirmed_transfer_details>> out_payments;
+
+    wallet.get_payments_out(out_payments, min_height, max_height);
+
+    for (std::list<std::pair<crypto::hash, tools::wallet2::confirmed_transfer_details>>::const_iterator it = out_payments.begin(); it != out_payments.end(); ++it)
+    {    
+      const crypto::hash &hash = it->first;
+      const tools::wallet2::confirmed_transfer_details &details = it->second;
+      
+      uint64_t change = details.m_change == (uint64_t)-1 ? 0 : details.m_change; // change may not be known
+      uint64_t fee = details.m_amount_in - details.m_amount_out;
+      
+      std::string payment_id = epee::string_tools::pod_to_hex(it->second.m_payment_id);
+
+      if (payment_id.substr(16).find_first_not_of('0') == std::string::npos)
+          payment_id = payment_id.substr(0,16);
+
+      TransactionInfo info;
+
+      info.PaymentId     = payment_id;
+      info.Amount        = details.m_amount_in - change - fee;
+      info.Fee           = fee;
+      info.DirectionOut = true;
+      info.Hash          = epee::string_tools::pod_to_hex(hash);
+      info.BlockHeight   = details.m_block_height;
+      info.Timestamp     = details.m_timestamp;
+      info.Confirmations = wallet_height - details.m_block_height;
+
+      for (const auto &d: details.m_dests) {
+          Transfer transfer;
+
+          transfer.Amount  = d.amount;
+          transfer.Address = get_account_address_as_str(wallet.testnet(), d.addr);
+
+          info.Transfers.emplace_back(std::move(transfer));
+      }
+
+      transactions.emplace_back(std::move(info));
+    }
+
+    std::list<std::pair<crypto::hash, tools::wallet2::unconfirmed_transfer_details>> upayments_out;
+
+    wallet.get_unconfirmed_payments_out(upayments_out);
+
+    for (std::list<std::pair<crypto::hash, tools::wallet2::unconfirmed_transfer_details>>::const_iterator it = upayments_out.begin(); it != upayments_out.end(); ++it)
+    {
+      const tools::wallet2::unconfirmed_transfer_details &details = it->second;
+      const crypto::hash &hash = it->first;
+
+      uint64_t amount = details.m_amount_in;
+      uint64_t fee = amount - details.m_amount_out;
+
+      std::string payment_id = epee::string_tools::pod_to_hex(it->second.m_payment_id);
+
+      if (payment_id.substr(16).find_first_not_of('0') == std::string::npos)
+          payment_id = payment_id.substr(0,16);
+
+      bool is_failed = details.m_state == tools::wallet2::unconfirmed_transfer_details::failed;
+
+      TransactionInfo info;
+
+      info.PaymentId     = payment_id;
+      info.Amount        = amount - details.m_change;
+      info.Fee           = fee;
+      info.DirectionOut = true;
+      info.Failed        = is_failed;
+      info.Pending       = true;
+      info.Hash          = epee::string_tools::pod_to_hex(hash);
+      info.Timestamp     = details.m_timestamp;
+      info.Confirmations = 0;
+
+      transactions.emplace_back(std::move(info));
+    }
+
+    std::list<std::pair<crypto::hash, tools::wallet2::payment_details>> upayments;
+
+    wallet.get_unconfirmed_payments(upayments);
+
+    for (std::list<std::pair<crypto::hash, tools::wallet2::payment_details>>::const_iterator it = upayments.begin(); it != upayments.end(); ++it)
+    {
+      const tools::wallet2::payment_details &details = it->second;
+      std::string payment_id = epee::string_tools::pod_to_hex(it->first);
+
+      if (payment_id.substr(16).find_first_not_of('0') == std::string::npos)
+          payment_id = payment_id.substr(0,16);
+
+      TransactionInfo info;
+
+      info.PaymentId     = payment_id;
+      info.Amount        = details.m_amount;
+      info.DirectionOut = false;
+      info.Hash          = epee::string_tools::pod_to_hex(details.m_tx_hash);
+      info.BlockHeight   = details.m_block_height;
+      info.Pending       = true;
+      info.Timestamp     = details.m_timestamp;
+      info.Confirmations = 0;
+
+      transactions.emplace_back(std::move(info));
+    }
+
+    std::string transaction_history_json = serializer::JSON<TransactionHistory>::serialize(transaction_history);
+
+    WalletTransactionHistoryCallbackRequest out;
+
+    out.Result  = 0;
+    out.History = epee::string_tools::buff_to_hex_nodelimer(transaction_history_json);
 
     result.load(out);
   });
