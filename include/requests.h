@@ -5,22 +5,25 @@
 
 namespace graft::supernode::request {
 
-namespace wnd {
-
-//forwards
-class WalletManager;
-
-}
-
 void registerRTARequests(graft::Router &router);
 void registerForwardRequests(graft::Router &router);
 void registerHealthcheckRequests(graft::Router &router);
 void registerDebugRequests(Router &router);
 
-namespace wnd
+}
+
+namespace graft {
+namespace walletnode {
+
+//forwards
+class WalletManager;
+
+namespace request
 {
 
-void registerWalletRequests(Router &router, wnd::WalletManager&);
+void registerWalletRequests(Router &router, WalletManager&);
+
+}
 
 }
 

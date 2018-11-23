@@ -19,7 +19,7 @@ class GraftWallet;
 namespace graft
 {
 
-namespace wnd
+namespace walletnode
 {
 
 /// Wallet manager
@@ -89,6 +89,6 @@ private:
     TaskManager& m_task_manager;
 };
 
-}//namespace wnd
+}//namespace walletnode
 
 }//namespace graft

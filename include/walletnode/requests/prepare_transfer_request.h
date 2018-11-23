@@ -7,7 +7,7 @@ namespace graft {
 
 class Context;
 
-namespace wnd {
+namespace walletnode {
 
 GRAFT_DEFINE_IO_STRUCT(WalletTransferDestination,
                        (std::string, Address),

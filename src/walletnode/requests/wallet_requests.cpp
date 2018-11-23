@@ -41,8 +41,9 @@ std::string getCallbackString(const graft::Input& input)
 
 namespace graft {
 
-namespace wnd
-{
+namespace walletnode {
+
+namespace request {
 
 Status walletCreateAccountRequestHandler
  (const Router::vars_t& vars, 
@@ -190,6 +191,8 @@ void registerWalletRequests(graft::Router& router, WalletManager& wallet_manager
     registerWalletRequest(router, wallet_manager, "/api/wallet_balance", METHOD_GET, walletBalanceRequestHandler);
     registerWalletRequest(router, wallet_manager, "/api/prepare_transfer", METHOD_GET, walletPrepareTransferRequestHandler);
     registerWalletRequest(router, wallet_manager, "/api/transaction_history", METHOD_GET, walletTransactionHistoryRequestHandler);
+}
+
 }
 
 }

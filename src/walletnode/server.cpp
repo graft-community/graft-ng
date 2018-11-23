@@ -12,7 +12,7 @@ namespace po = boost::program_options;
 
 namespace graft {
 
-namespace wnd {
+namespace walletnode {
 
 WalletServer::WalletServer()
 {
@@ -26,7 +26,7 @@ void WalletServer::registerWalletRequests(ConnectionManager& httpcm)
 {
     Router router;
 
-    graft::wnd::registerWalletRequests(router, *m_walletManager);
+    graft::walletnode::request::registerWalletRequests(router, *m_walletManager);
 
     httpcm.addRouter(router);
 }
@@ -34,7 +34,7 @@ void WalletServer::registerWalletRequests(ConnectionManager& httpcm)
 void WalletServer::setHttpRouters(ConnectionManager& httpcm)
 {
     Router health_router;
-    graft::registerHealthcheckRequests(health_router);
+    graft::supernode::request::registerHealthcheckRequests(health_router);
     httpcm.addRouter(health_router);
 
     registerWalletRequests(httpcm);
@@ -118,5 +118,5 @@ void WalletServer::startPeriodicTasks()
         std::chrono::milliseconds(WALLET_DISK_CACHES_UPDATE_TIME_MS), std::chrono::milliseconds(1));
 }
 
-}//namespace wnd
+}//namespace walletnode
 }//namespace graft

@@ -15,7 +15,7 @@
 #include <wallet/graft_wallet.h>
 
 using namespace graft;
-using namespace graft::wnd;
+using namespace graft::walletnode;
 
 namespace
 {
@@ -471,35 +471,6 @@ void WalletManager::prepareTransfer(Context& context, const WalletId& wallet_id,
   });
 }
 
-namespace
-{
-
-GRAFT_DEFINE_IO_STRUCT_INITED(Transfer,
-  (uint64_t,    Amount,   0),
-  (std::string, Address,  std::string())
-);
-
-GRAFT_DEFINE_IO_STRUCT_INITED(TransactionInfo,
-  (bool,                  DirectionOut, false),
-  (bool,                  Pending,       false),
-  (bool,                  Failed,        false),
-  (uint64_t,              Amount,        0),
-  (uint64_t,              Fee,           0),
-  (uint64_t,              BlockHeight,   0),
-  (std::string,           Hash,          std::string()),
-  (std::time_t,           Timestamp,     0),
-  (std::string,           PaymentId,     std::string()),
-  (std::vector<Transfer>, Transfers,     std::vector<Transfer>()),
-  (uint64_t,              Confirmations, 0),
-  (uint64_t,              UnlockTime,   0)
-);
-
-GRAFT_DEFINE_IO_STRUCT(TransactionHistory,
-  (std::vector<TransactionInfo>, Transactions)
-);
-
-}
-
 void WalletManager::requestTransactionHistory(Context& context, const WalletId& wallet_id, const std::string& account_data, const std::string& password, const Url& callback_url)
 {
   runAsyncForWallet(context, wallet_id, account_data, password, callback_url, [this, wallet_id, callback_url](tools::GraftWallet& wallet, OutHttp& result) {
@@ -637,12 +608,10 @@ void WalletManager::requestTransactionHistory(Context& context, const WalletId& 
       transactions.emplace_back(std::move(info));
     }
 
-    std::string transaction_history_json = serializer::JSON<TransactionHistory>::serialize(transaction_history);
-
     WalletTransactionHistoryCallbackRequest out;
 
     out.Result  = 0;
-    out.History = epee::string_tools::buff_to_hex_nodelimer(transaction_history_json);
+    out.History = std::move(transaction_history);
 
     result.load(out);
   });

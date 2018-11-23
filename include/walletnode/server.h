@@ -5,7 +5,7 @@
 
 namespace graft {
 
-namespace wnd {
+namespace walletnode {
 
 /// Wallet service
 class WalletServer: public GraftServer
@@ -41,5 +41,5 @@ private:
     std::unique_ptr<WalletManager> m_walletManager;
 };
 
-}//namespace wnd
+}//namespace walletnode
 }//namespace graft

@@ -5,7 +5,7 @@
 namespace graft
 {
 
-namespace wnd
+namespace walletnode
 {
 
 std::terminate_handler prev_terminate = nullptr;
@@ -40,17 +40,17 @@ void terminate()
     prev_terminate();
 }
 
-} //namespace wnd
+} //namespace walletnode
 } //namespace graft
 
 int main(int argc, const char** argv)
 {
-    graft::wnd::prev_terminate = std::set_terminate( graft::wnd::terminate );
+    graft::walletnode::prev_terminate = std::set_terminate( graft::walletnode::terminate );
 
     try
     {
         //TODO: return result from server
-        graft::wnd::WalletServer server;
+        graft::walletnode::WalletServer server;
         bool res = server.run(argc, argv);
         if(!res) return -2;
     } catch (const std::exception & e) {
