@@ -1,6 +1,6 @@
 [submodule "cryptonode"]
 	path = modules/cryptonode
-	url = https://github.com/jagerman/GraftNetwork.git
+	url = https://github.com/graft-community/GraftNetwork.git
 	branch = gc-alpha
 [submodule "libr3"]
 	path = modules/libr3

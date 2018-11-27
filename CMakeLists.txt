@@ -59,7 +59,7 @@ set(GS_SOURCES
 
 set(GS_INCLUDE_DIRS
     ${PROJECT_SOURCE_DIR}/modules/mongoose
-    ${PROJECT_SOURCE_DIR}/modules/libr3/include
+    ${r3_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/include/requests
     ${PROJECT_SOURCE_DIR}/include/rta
     ${PROJECT_SOURCE_DIR}/include
@@ -76,10 +76,11 @@ set(GS_LIBS
 
 if(NOT EXTERNAL_CRYPTONODE)
   set(CRYPTONODE_INCLUDE_DIRS
-    ${PROJECT_SOURCE_DIR}/modules/cryptonode/contrib/epee/include
-    ${PROJECT_SOURCE_DIR}/modules/cryptonode/external/easylogging++
-    ${PROJECT_SOURCE_DIR}/modules/cryptonode/external
-    ${PROJECT_SOURCE_DIR}/modules/cryptonode/src
+    ${graftnetwork_SOURCE_DIR}/contrib/epee/include
+    ${graftnetwork_SOURCE_DIR}/external/easylogging++
+    ${graftnetwork_SOURCE_DIR}/external
+    ${graftnetwork_SOURCE_DIR}/src
+    ${graftnetwork_BINARY_DIR}/version
     )
 endif()
 
