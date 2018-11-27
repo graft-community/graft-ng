@@ -1,3 +1,9 @@
+graft-ng (0~alpha3+gc2-1~bionic1) bionic; urgency=medium
+
+  * Refuse to build an auth sample for an all-0 hash
+
+ -- Jason Rhinelander <jason@imaginary.ca>  Tue, 27 Nov 2018 17:35:45 -0400
+
 graft-ng (0~alpha3+gc1-1~bionic1) bionic; urgency=medium
 
   * Rewrote and optimized supernode selection code
