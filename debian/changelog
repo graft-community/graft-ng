@@ -1,3 +1,11 @@
+graft-ng (0~alpha3+gc1-1~bionic1) bionic; urgency=medium
+
+  * Rewrote and optimized supernode selection code
+  * Updated embedded GraftNetwork repository
+  * include path improvements
+
+ -- Jason Rhinelander <jason@imaginary.ca>  Tue, 27 Nov 2018 13:49:05 -0400
+
 graft-ng (0~alpha3-1~1bionic1) bionic; urgency=medium
 
   * Initial release.
