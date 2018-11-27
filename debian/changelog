@@ -1,3 +1,9 @@
+graft-ng (0~alpha3+gc2-1) unstable; urgency=medium
+
+  * Refuse to build an auto sample for an all-0 hash
+
+ -- Jason Rhinelander <jason@imaginary.ca>  Tue, 27 Nov 2018 17:34:44 -0400
+
 graft-ng (0~alpha3+gc1-1) unstable; urgency=medium
 
   * Rewrote and optimized supernode selection code
