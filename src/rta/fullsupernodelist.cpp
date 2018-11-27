@@ -233,7 +233,8 @@ bool FullSupernodeList::buildAuthSample(uint64_t height, vector<SupernodePtr> &o
 
     MDEBUG("building auth sample for height: " << height);
 
-    if (!getBlockHash(height - AUTH_SAMPLE_HASH_HEIGHT, block_hash_str)) {
+    if (!getBlockHash(height - AUTH_SAMPLE_HASH_HEIGHT, block_hash_str)
+            || block_hash_str == "0000000000000000000000000000000000000000000000000000000000000000") {
         LOG_ERROR("getBlockHash error");
         return false;
     }
