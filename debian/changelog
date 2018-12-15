@@ -1,3 +1,12 @@
+graft-ng (0~alpha3+gc3-1) unstable; urgency=medium
+
+  * Updated GN submodule
+  * Update submodule for missing version dep
+  * Force off AVX512 compiler flags
+  * Updated GraftNetwork branch with upstream #199 fix
+
+ -- Jason Rhinelander <jason@imaginary.ca>  Sat, 15 Dec 2018 11:06:47 -0400
+
 graft-ng (0~alpha3+gc2-1) unstable; urgency=medium
 
   * Refuse to build an auto sample for an all-0 hash
