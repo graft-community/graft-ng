@@ -227,22 +227,22 @@ endif()
 add_dependencies(supernode_common requests_common graft)
 
 ### supernode
-add_executable(supernodeng
+add_executable(supernode_bin
     ${PROJECT_SOURCE_DIR}/src/supernode/main.cpp
     )
 
-set_target_properties(supernodeng PROPERTIES OUTPUT_NAME supernode)
+set_target_properties(supernode_bin PROPERTIES OUTPUT_NAME supernode)
 
-target_include_directories(supernodeng PRIVATE
+target_include_directories(supernode_bin PRIVATE
     ${GRAFT_INCLUDE_DIRS}
     )
 
-target_link_libraries(supernodeng PRIVATE
+target_link_libraries(supernode_bin PRIVATE
     graft
     supernode_common
     )
 
-add_dependencies(supernodeng graft supernode_common)
+add_dependencies(supernode_bin graft supernode_common)
 
 
 
@@ -265,6 +265,8 @@ target_link_libraries(wallet_server PRIVATE
     )
 
 add_dependencies(wallet_server graft requests_common)
+
+install(TARGETS supernode_bin wallet_server DESTINATION bin)
 
 ##################
 ### tests section
