@@ -125,6 +125,8 @@ add_library(graft
     ${PROJECT_SOURCE_DIR}/src/lib/graft/sys_info_request.cpp
     )
 
+add_dependencies(graft supernode_version)
+
 target_include_directories(graft PRIVATE
     ${GRAFT_INCLUDE_DIRS}
     )
