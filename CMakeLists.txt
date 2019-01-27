@@ -35,13 +35,6 @@ set(GRAFT_INCLUDE_DIRS
     ${PROJECT_BINARY_DIR}
     )
 
-set(GS_LIBS
-    r3
-    lib3rdparty
-    pcre
-    dl
-    )
-
 
 if(NOT EXTERNAL_CRYPTONODE)
   set(CRYPTONODE_INCLUDE_DIRS
@@ -132,6 +125,8 @@ target_include_directories(graft PRIVATE
     )
 
 target_link_libraries(graft PRIVATE
+    r3
+    lib3rdparty
     graftlet_lib
     pcre
     ${CMAKE_THREAD_LIBS_INIT}
@@ -160,7 +155,6 @@ target_include_directories(requests_common PRIVATE
 
 target_link_libraries(requests_common PRIVATE
     ${CRYPTONODE_LIBS}
-    ${GS_LIBS}
     ${CMAKE_THREAD_LIBS_INIT}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${Boost_CHRONO_LIBRARY}
