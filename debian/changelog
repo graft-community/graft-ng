@@ -1,3 +1,231 @@
+graft-ng (0~alpha4.1+gc1-1) unstable; urgency=medium
+
+  * Update to alpha 4.1
+
+  [ Alexander Suprunenko ]
+  * Obsolete tests disabled
+  * The State Machine implemented
+  * Some lost code fixed
+  * In handler logging category support added.
+  * State Machine logging added
+  * State machine columns added
+  * Submodule modules/cryptonode updated
+  * Supernode should not crash with assert when postponed task not found
+  * Obsolete tests removed
+  * The PromiseQueue size should be a power of 2.
+
+  [ Ilya Kitaev ]
+  * explicitly applied default log format with %rfile
+  * Updated cryptonode submodule
+
+  [ Alexander Suprunenko ]
+  * Enable c++17
+  * Graftlets added
+  * invoke and register_handler templates implemented
+  * Graftlets loading implemented
+  * Graftlets endpoints added into the server.
+  * Graftlets tests added.
+  * Logging improved.
+  * mlog_set_format is removed, mlog_configure sets format instead.
+  * Comments ;; are removed then strings are trimmed those from config.ini
+  * cryptonode submodule fixed
+  * Fixed crash if periodic task completes with error status.
+  * after review. checkVersion renamed to checkFwVersion.
+  * after review. graftlet_lib target moved level up. Test graftlets are built for tests only.
+  * after review. GEL interface created; GraftletLoader template interface is narrowed to IGraftlet.
+  * after review. Single invoke<Sign> is left public in GraftletHandlerT.
+  * after review. REGISTER_GENERIC and is_call flag removed.
+  * after review. IGraftlet interface improved.
+  * after review. GraftServer::addGraftletEndpoints function added.
+  * after review. Copyright added.
+  * after review. std::cout output removed.
+  * cryptonode submodule updated
+  * GraftletLoader::checkDependencies() implemented
+  * Graftlets dependencies tests added.
+  * checkDependencies call added into the server
+  * timerEvents test fixed after change of periodic task initial status
+  * getGraftletDependencies function made optional in graftlets.
+  * The interface of the GraftServer server class improved.
+  * after review. findGraftletsAtDirectory renamed as findGraftletsInDirectory
+  * after review. A bug in an exception handler fixed.
+  * after review. Graph renamed as DependencyGraph
+  * A bug when duplicated graftlets directories, fixed.
+  * Expiration callback implemented.
+  * after review. Normal termination if graftlet cycle has found.
+  * boost::shared_mutex replaced by std::shared_mutex
+  * boost::any replaced by std::any
+  * node is made as shared_ptr
+  * Context groups implemented.
+  * forEach clears invalid keys
+  * graft static library separated
+  * GraftServer::run refactored
+  * rta & request are removed from include directories
+  * class Supernode implemented
+  * libgraft and supernode sources separated
+  * CMakeConfig.h.in
+  * after review. GraftServer::init takes ConfigOpts as a reference
+  * GraftServer::m_conManagers becomes a map
+  * Some members of  ConfigOpts moved to ConfigOptsEx
+  * CMakeLists.txt some fixes
+  * Command line --help fixed.
+  * template Worker renamed to WorkerT
+  * Workers expelling implemented in the thread pool.
+  * workers-expelling-interval-ms added into config.ini
+  * Expelling test added.
+  * AddPeriodicTask that can be called from handler added.
+  * The default expelling time changed to 1000.
+  * Counters types are set as uint64_t
+
+  [ andrew ]
+  * Added sys-info request/endpoint
+  * Fix for merge-bug
+
+  [ Ilya Kitaev ]
+  * fix: auth sample only validates rta txes
+
+  [ Alexander Suprunenko ]
+  * after review. minor changes.
+  * Future postpones implemented.
+  * ExpiringList test added.
+  * Forgotten expiring_list.h
+  * General Callback implemented.
+  * Forward to walletnode implemented.
+  * a minor bug fixed
+  * host field added into Input
+  * fix substitution uri
+  * Set X-Callback as http://0.0.0.0:<port>/...
+  * s/General/Generic/
+
+  [ andrew ]
+  * Done refactoring step '{include,src}/requests/* --> {include,src}/supernode/requests/'
+  * Applied namespace graft::supernode::request to requests
+
+  [ Alexander Suprunenko ]
+  * GraftServerTest fixture refactoring.
+  * Generic callback test added
+  * typos fix
+
+  [ andrew ]
+  * Tiny after-review fixes. Just to keep namespace more clear
+
+  [ EDDragonWolf ]
+  * Added sendTransferRequest and extended PayRequest for Account-based payments
+  * Refactored handlers for pay request
+  * Fixed class namespace usage
+
+  [ Alexander Suprunenko ]
+  * Compilation bug of tests fixed.
+
+  [ andrew ]
+  * Moved graft::lib and graft::supernode related files in different locations
+
+  [ Alexander Suprunenko ]
+  * ConfigOpts parameters fixed
+  * In tests MainServer based on GraftServer instead of Looper
+  * Renaming class members.
+
+  [ EDDragonWolf ]
+  * Updated includes for SendTransfer request
+
+  [ Alexander Suprunenko ]
+  * JsonRpcTest & CryptonodeHandlersTest are refactored.
+  * In GSTest excessive functions removed.
+
+  [ LenyKholodov ]
+  * WalletManager implementation (#156)
+
+  [ Alexander Suprunenko ]
+  * Enable inheritance of SysInfoCounter.
+  * Style fixing
+  * Access to SysInfoCounter is moved to HandlerAPI instead of Context.
+  * In TaskManager m_sysInfoCounter is made as reference.
+  * Blacklist implemented with a test.
+  * GraftServerTest fixture fixed.
+  * Config.ini [server] blacklist parameter added.
+
+  [ Ilya Kitaev ]
+  * fix: update lastUpdateTime before test
+
+  [ Alexander Suprunenko ]
+  * Copyright on radix_tree added.
+  * exit_error on blacklist loading error.
+  * Refactoring. ConnectionBase class added.
+  * Ban triggering algorithm.
+  * BlackList::removeEntry added.
+  * Beautify tests.
+  * BlackList::isAllowedActive added.
+  * [ipfilter] section added into config.ini
+  * BlackList interface improved.
+  * Fix libr3 submodule
+  * Ban test added.
+  * [ipfilter] description added
+  * Strand hangs in Release mode fixed.
+
+  [ Ilya Kitaev ]
+  * updated cryptonode module to latest alpha3
+  * Write to log if supernode init faied
+  * Supernode::busy() + r/w lock
+  * check if supernode busy before applying announce
+
+  [ Jason Rhinelander ]
+  * Updated GraftNetwork to revert connection killer
+
+  [ Ilya Kitaev ]
+  * fixed deadlock in Supernode class
+
+  [ Alexander Suprunenko ]
+  * Wrong test custom command target fixed.
+  * requests.cpp & requestdefines.cpp are split. requests_common & supernode_common static libraries are created.
+  * The UpstreamManager class added.
+  * uri_substitutions parameters expanded.
+
+  [ Ilya Kitaev ]
+  * cryptonode submodule update
+  * stake wallets loaded after server start
+  * debug: endpoint to close stake wallets
+  * shared io_service for all stake wallets
+  * deleted debugging code
+  * rename debug/close -> debug/close_wallets endpoint
+
+  [ Alexander Suprunenko ]
+  * UpstreamManager added.
+
+  [ Ilya Kitaev ]
+  * cryptonode submodule updated
+  * restored lost debug endpoint
+  * updated cryptonode submodule
+  * fix: refresh from blockheight for new stake wallet
+  * added version information
+  * stakeAmount() call outside of logger
+  * fix: type for lastUpdateTime
+  * Updated cryptonode submodule
+
+  [ Jason Rhinelander ]
+  * Add missing `install` for binaries
+
+  [ Alexander Suprunenko ]
+  * Forward of periodic task adds X-Callback header that is not required. The bug fixed.
+  * Check on excessive X-Callback header added.
+  * after review. The word 'Warning' removed.
+  * The program exits gracefully on bind fail.
+  * after review. Logging level changed.
+  * The interface concerning X-Callback improved.
+
+  [ Jason Rhinelander ]
+  * Add missing dependency on generated version.h
+  * Update GraftNetwork to latest gc-alpha
+  * Simplify library dependencies
+
+  [ Ilya Kitaev ]
+  * Updated cryptonode module
+  * Alpha 4.1 release. version bump
+  * Updated cryptonode submodule
+
+  [ Jason Rhinelander ]
+  * Don't build old graft-supernode binary
+
+ -- Jason Rhinelander <jason@imaginary.ca>  Mon, 11 Feb 2019 18:22:11 -0400
+
 graft-ng (0~alpha3+gc3-1) unstable; urgency=medium
 
   * Updated GN submodule

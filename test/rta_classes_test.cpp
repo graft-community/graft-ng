@@ -30,12 +30,12 @@
 #include <misc_log_ex.h>
 #include <gtest/gtest.h>
 #include <boost/scoped_ptr.hpp>
-#include <thread_pool/thread_pool.hpp>
+#include "lib/graft/thread_pool/thread_pool.hpp"
 
 
 // cryptonode includes
 
-#include <requests/sendsupernodeannouncerequest.h>
+#include "supernode/requests/send_supernode_announce.h"
 #include <rta/supernode.h>
 #include <rta/fullsupernodelist.h>
 #include <misc_log_ex.h>
@@ -49,12 +49,9 @@ struct SupernodeTest : public ::testing::Test
     SupernodeTest()
     {
         mlog_configure("", true);
-        mlog_set_log_level(1);
+        mlog_set_log_level(2);
     }
 };
-
-
-
 
 TEST_F(SupernodeTest, open)
 {
@@ -70,6 +67,26 @@ TEST_F(SupernodeTest, open)
     EXPECT_TRUE(sn1.walletAddress() == "F4xWex5prppRooAqBZ7aBxTCRsPrzvKhGhWiy41Zt4DVX6iTk1HJqZiPNcgW4NkhE77mF7gRkYLRQhGKEG1rAs8NSp7aU93");
     EXPECT_TRUE(sn1.stakeAmount() > 0);
 }
+
+TEST_F(SupernodeTest, busy)
+{
+    MGINFO_YELLOW("*** This test requires running cryptonode RPC on localhost:28881. If not running, test will fail ***");
+
+    const std::string wallet_path = "supernode_tier1_1";
+    const std::string daemon_addr = "localhost:28881";
+    const bool testnet = true;
+    Supernode sn1(wallet_path, "", daemon_addr, testnet);
+    EXPECT_FALSE(sn1.busy());
+
+    std::future<bool> f = std::async(std::launch::async, [&] () {
+        return sn1.refresh();
+    });
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    EXPECT_TRUE(sn1.busy());
+    f.wait();
+    EXPECT_FALSE(sn1.busy());
+}
+
 
 TEST_F(SupernodeTest, watchOnly)
 {
@@ -257,6 +274,7 @@ TEST_F(FullSupernodeListTest, buildAuthSample)
 {
     MGINFO_YELLOW("*** This test requires running cryptonode RPC on localhost:28881. If not running, test will fail ***");
 
+    // currently test works against public testnet
     const std::string daemon_addr = "localhost:28881";
     const bool testnet = true;
 
@@ -265,6 +283,11 @@ TEST_F(FullSupernodeListTest, buildAuthSample)
     size_t loadedItems = sn_list.loadFromDirThreaded(".", foundItems);
 
     ASSERT_TRUE(loadedItems > 0);
+
+    // update lastUpdated
+    for (const std::string &addr : sn_list.items()) {
+      sn_list.get(addr)->setLastUpdateTime(std::time(nullptr));
+    }
 
     std::string hash_str;
     sn_list.getBlockHash(2, hash_str);
@@ -502,7 +525,7 @@ TEST_F(FullSupernodeListTest, announce1)
 
     FullSupernodeList fsl(daemon_addr, testnet);
 
-    SupernodeAnnounce announce;
+    graft::supernode::request::SupernodeAnnounce announce;
     ASSERT_TRUE(sn.prepareAnnounce(announce));
 
 
@@ -521,3 +544,4 @@ TEST_F(FullSupernodeListTest, announce1)
     ASSERT_TRUE(watch_only_sn2.get() == nullptr);
 
 }
+

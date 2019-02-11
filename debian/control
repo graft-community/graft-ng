@@ -2,7 +2,7 @@ Source: graft-ng
 Section: net
 Priority: optional
 Maintainer: Jason Rhinelander <jason@imaginary.ca>
-Build-Depends: debhelper (>= 11) | dh-systemd, cmake, g++, libgraft-alpha-dev, libpcre3-dev, rapidjson-dev, check, pkg-config
+Build-Depends: debhelper (>= 11) | dh-systemd, cmake, g++, libgraft-alpha-dev (>= 1.3.4.1+gc1), libpcre3-dev, rapidjson-dev, check, pkg-config
 Standards-Version: 4.1.3
 Homepage: https://github.com/graft-project/graft-ng
 
@@ -12,8 +12,10 @@ Depends: ${shlibs:Depends}, ${misc:Depends}
 Recommends: graftnoded-alpha, graft-wallet-alpha
 Suggests: graft-supernode-wizard
 Description: GRAFT supernode (RTA alpha)
- This package contains the `graft_server' binary that communicates with a
- graftnoded to host a GRAFT supernode.
+ This package contains the `graft-supernode' binary that communicates with a
+ graftnoded to host a GRAFT RTA supernode.
+ .
+ Note that this binary is called simply `supernode` in the upstream package.
 
 Package: graft-supernode-wizard
 Architecture: all
