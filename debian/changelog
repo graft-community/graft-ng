@@ -1,3 +1,23 @@
+graft-ng (0~alpha4.2+gc1-1~bionic1) bionic; urgency=medium
+
+  [ Jason Rhinelander ]
+  * Update to alpha 4.2
+
+  [ Alexander Suprunenko ]
+  * Debug info extracted into separate files.
+  * Extracting debug info enhanced.
+  * GraftServerTest.genericCallback test fixed.
+  * Extracting debug info messages enhanced.
+  * Random part added for supernode announce period.
+  * Random number generation improved.
+
+  [ Ilya Kitaev ]
+  * fix: using shared io_service for http client in FullSupernodeList
+  * version bump
+  * Updated cryptonode submodule
+
+ -- Jason Rhinelander <jason@imaginary.ca>  Thu, 14 Feb 2019 13:43:27 -0400
+
 graft-ng (0~alpha4.1+gc1-1~bionic1) bionic; urgency=medium
 
   * Updated to alpha4.1
