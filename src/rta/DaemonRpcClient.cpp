@@ -38,10 +38,8 @@ using namespace std;
 
 namespace graft {
 
-DaemonRpcClient::DaemonRpcClient(const std::string &daemon_addr, const std::string &daemon_login, const std::string &daemon_pass,
-                                 boost::shared_ptr<boost::asio::io_service> ios)
-    : m_http_client(ios)
-    , m_rpc_timeout(std::chrono::seconds(30))
+DaemonRpcClient::DaemonRpcClient(const std::string &daemon_addr, const std::string &daemon_login, const std::string &daemon_pass)
+    :  m_rpc_timeout(std::chrono::seconds(30))
 {
 
     boost::shared_mutex mutex;
@@ -171,6 +169,42 @@ bool DaemonRpcClient::get_block_hash(uint64_t height, string &hash)
     }
 
     hash = resp_t.result;
+    return true;
+}
+
+bool DaemonRpcClient::send_supernode_stake_txs(const char* network_address, const char* id)
+{
+    epee::json_rpc::request<cryptonote::COMMAND_RPC_SUPERNODE_GET_STAKE_TRANSACTIONS::request> req = AUTO_VAL_INIT(req);
+    epee::json_rpc::response<cryptonote::COMMAND_RPC_SUPERNODE_GET_STAKE_TRANSACTIONS::response, std::string> res = AUTO_VAL_INIT(res);
+    req.jsonrpc = "2.0";
+    req.id = epee::serialization::storage_entry(0);
+    req.method = "send_supernode_stake_txs";
+    req.params.network_address = network_address;
+    req.params.supernode_public_id = id;
+    bool r = epee::net_utils::invoke_http_json("/json_rpc/rta", req, res, m_http_client, m_rpc_timeout);
+    if (!r) {
+        LOG_ERROR("/json_rpc/rta/send_supernode_stake_txs error");
+        return false;
+    }
+
+    return true;
+}
+
+bool DaemonRpcClient::send_supernode_blockchain_based_list(const char* network_address, const char* id)
+{
+    epee::json_rpc::request<cryptonote::COMMAND_RPC_SUPERNODE_GET_BLOCKCHAIN_BASED_LIST::request> req = AUTO_VAL_INIT(req);
+    epee::json_rpc::response<cryptonote::COMMAND_RPC_SUPERNODE_GET_BLOCKCHAIN_BASED_LIST::response, std::string> res = AUTO_VAL_INIT(res);
+    req.jsonrpc = "2.0";
+    req.id = epee::serialization::storage_entry(0);
+    req.method = "send_supernode_blockchain_based_list";
+    req.params.network_address = network_address;
+    req.params.supernode_public_id = id;
+    bool r = epee::net_utils::invoke_http_json("/json_rpc/rta", req, res, m_http_client, m_rpc_timeout);
+    if (!r) {
+        LOG_ERROR("/json_rpc/rta/send_supernode_blockchain_based_list error");
+        return false;
+    }
+
     return true;
 }
 

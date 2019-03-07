@@ -225,7 +225,9 @@ add_library(supernode_common
     ${PROJECT_SOURCE_DIR}/src/supernode/requests/sale_status.cpp
     ${PROJECT_SOURCE_DIR}/src/supernode/requests/send_raw_tx.cpp
     ${PROJECT_SOURCE_DIR}/src/supernode/requests/send_supernode_announce.cpp
+    ${PROJECT_SOURCE_DIR}/src/supernode/requests/send_supernode_stake_txs.cpp
     ${PROJECT_SOURCE_DIR}/src/supernode/requests/send_transfer.cpp
+    ${PROJECT_SOURCE_DIR}/src/supernode/requests/blockchain_based_list.cpp
     ${PROJECT_SOURCE_DIR}/src/rta/DaemonRpcClient.cpp
     ${PROJECT_SOURCE_DIR}/src/rta/fullsupernodelist.cpp
     ${PROJECT_SOURCE_DIR}/src/rta/supernode.cpp
@@ -263,6 +265,7 @@ add_executable(supernode_bin
     )
 
 set_target_properties(supernode_bin PROPERTIES OUTPUT_NAME supernode)
+set_target_properties(supernode_bin PROPERTIES LINK_FLAGS "-Wl,-E")
 
 target_include_directories(supernode_bin PRIVATE
     ${GRAFT_INCLUDE_DIRS}

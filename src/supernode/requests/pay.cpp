@@ -65,7 +65,7 @@ Status processAuthorizationRequest(const std::string &tx_hex, const PayRequest &
     // send multicast to /cryptonode/authorize_rta_tx_request
     MulticastRequestJsonRpc cryptonode_req;
     for (const auto & sn : authSample) {
-        cryptonode_req.params.receiver_addresses.push_back(sn->walletAddress());
+        cryptonode_req.params.receiver_addresses.push_back(sn->idKeyAsString());
     }
 
     Output innerOut;
@@ -79,7 +79,7 @@ Status processAuthorizationRequest(const std::string &tx_hex, const PayRequest &
     cryptonode_req.method = "multicast";
     cryptonode_req.params.callback_uri =  "/cryptonode/authorize_rta_tx_request";
     cryptonode_req.params.data = innerOut.data();
-    cryptonode_req.params.sender_address = supernode->walletAddress();
+    cryptonode_req.params.sender_address = supernode->idKeyAsString();
     // store payment id as we need it to change the sale/pay state in next call
     ctx.local["payment_id"] = pay_request.PaymentID;
     // TODO: what is the purpose of PayData?
@@ -119,7 +119,7 @@ Status handleClientPayRequest(const Router::vars_t& vars, const graft::Input& in
     }
 
     std::vector<SupernodePtr> authSample;
-    if (!fsl->buildAuthSample(in.BlockNumber, authSample) || authSample.size() != FullSupernodeList::AUTH_SAMPLE_SIZE) {
+    if (!fsl->buildAuthSample(in.BlockNumber, in.PaymentID, authSample) || authSample.size() != FullSupernodeList::AUTH_SAMPLE_SIZE) {
         return errorBuildAuthSample(output);
     }
 
@@ -209,7 +209,7 @@ Status handleWaitingTxReply(const Router::vars_t& vars, const graft::Input& inpu
     }
 
     std::vector<SupernodePtr> authSample;
-    if (!fsl->buildAuthSample(payData.BlockNumber, authSample) || authSample.size() != FullSupernodeList::AUTH_SAMPLE_SIZE) {
+    if (!fsl->buildAuthSample(payData.BlockNumber, payData.PaymentID, authSample) || authSample.size() != FullSupernodeList::AUTH_SAMPLE_SIZE) {
         return errorBuildAuthSample(output);
     }
 

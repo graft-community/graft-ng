@@ -17,18 +17,20 @@
 #include <string>
 
 #undef MONERO_DEFAULT_LOG_CATEGORY
-#define MONERO_DEFAULT_LOG_CATEGORY "supernode.payrequest"
+#define MONERO_DEFAULT_LOG_CATEGORY "supernode.debugrequest"
 
 namespace graft::supernode::request::debug {
 
 GRAFT_DEFINE_IO_STRUCT(DbSupernode,
     (std::string, Address),
+    (std::string, PublicId),
     (uint64, StakeAmount),
     (uint64, LastUpdateAge)
 );
 
 GRAFT_DEFINE_IO_STRUCT(SupernodeListResponse,
-    (std::vector<DbSupernode>, items)
+    (std::vector<DbSupernode>, items),
+    (uint64_t, height)
 );
 
 GRAFT_DEFINE_JSON_RPC_RESPONSE_RESULT(SupernodeListJsonRpcResult, SupernodeListResponse);
@@ -49,6 +51,7 @@ Status getSupernodeList(const Router::vars_t& vars, const graft::Input& input,
     auto supernodes = fsl->items();
 
     SupernodeListJsonRpcResult resp;
+    resp.result.height = fsl->getBlockchainBasedListMaxBlockNumber();
     for (auto& sa : supernodes)
     {
         auto sPtr = fsl->get(sa);
@@ -67,6 +70,7 @@ Status getSupernodeList(const Router::vars_t& vars, const graft::Input& input,
         DbSupernode dbSupernode;
         dbSupernode.LastUpdateAge = lastUpdateAge;
         dbSupernode.Address = sPtr->walletAddress();
+        dbSupernode.PublicId = sPtr->idKeyAsString();
         dbSupernode.StakeAmount = sPtr->stakeAmount();
         resp.result.items.push_back(dbSupernode);
     }
@@ -82,27 +86,31 @@ Status getAuthSample(const Router::vars_t& vars, const graft::Input& input,
     FullSupernodeListPtr fsl = ctx.global.get(CONTEXT_KEY_FULLSUPERNODELIST, FullSupernodeListPtr());
     std::vector<SupernodePtr> sample;
 
-    uint64_t height;
+
+    std::string payment_id;
     try
     {
-        height = stoull(vars.find("height")->second);
+        payment_id = vars.find("payment_id")->second;
     }
     catch(...)
     {
         return errorInternalError("invalid input", output);
     }
 
-    const bool ok = fsl->buildAuthSample(height, sample);
+    SupernodeListJsonRpcResult resp;
+    resp.result.height = fsl->getBlockchainBasedListMaxBlockNumber();
+
+    const bool ok = fsl->buildAuthSample(resp.result.height, payment_id, sample);
     if(!ok)
     {
         return errorInternalError("failed to build auth sample", output);
     }
 
-    SupernodeListJsonRpcResult resp;
     for(auto& sPtr : sample)
     {
         DbSupernode sn;
         sn.Address = sPtr->walletAddress();
+        sn.PublicId = sPtr->idKeyAsString();
         sn.StakeAmount = sPtr->stakeAmount();
         sn.LastUpdateAge = static_cast<unsigned>(std::time(nullptr)) - sPtr->lastUpdateTime();
         resp.result.items.push_back(sn);
@@ -139,7 +147,7 @@ void __registerDebugRequests(Router &router)
     router.addRoute("/debug/supernode_list/{all:[0-1]}", METHOD_GET, _HANDLER(getSupernodeList));
     router.addRoute("/debug/announce", METHOD_POST, _HANDLER(doAnnounce));
     router.addRoute("/debug/close_wallets/", METHOD_POST, _HANDLER(closeStakeWallets));
-    router.addRoute("/debug/auth_sample/{height:[0-9]+}", METHOD_GET, _HANDLER(getAuthSample));
+    router.addRoute("/debug/auth_sample/{payment_id:[0-9a-zA-Z]+}", METHOD_GET, _HANDLER(getAuthSample));
 }
 
 }

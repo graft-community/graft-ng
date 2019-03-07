@@ -15,6 +15,9 @@
 #undef MONERO_DEFAULT_LOG_CATEGORY
 #define MONERO_DEFAULT_LOG_CATEGORY "supernode.fullsupernodelist"
 
+constexpr size_t BLOCKCHAIN_BASED_LIST_DELAY_BLOCK_COUNT = 10;
+constexpr size_t BLOCKCHAIN_BASED_LIST_HISTORY_SIZE      = 100;
+
 namespace fs = boost::filesystem;
 using namespace boost::multiprecision;
 
@@ -123,11 +126,12 @@ constexpr int32_t FullSupernodeList::TIERS, FullSupernodeList::ITEMS_PER_TIER, F
 constexpr int64_t FullSupernodeList::AUTH_SAMPLE_HASH_HEIGHT, FullSupernodeList::ANNOUNCE_TTL_SECONDS;
 #endif
 
-FullSupernodeList::FullSupernodeList(const string &daemon_address, boost::shared_ptr<boost::asio::io_service> ios, bool testnet)
+FullSupernodeList::FullSupernodeList(const string &daemon_address, bool testnet)
     : m_daemon_address(daemon_address)
     , m_testnet(testnet)
-    , m_rpc_client(daemon_address, "", "", ios)
+    , m_rpc_client(daemon_address, "", "")
     , m_tp(new utils::ThreadPool())
+    , m_blockchain_based_list_max_block_number()
 {
     m_refresh_counter = 0;
 }
@@ -145,26 +149,31 @@ bool FullSupernodeList::add(Supernode *item)
 
 bool FullSupernodeList::add(SupernodePtr item)
 {
-    if (exists(item->walletAddress())) {
-        LOG_ERROR("item already exists: " << item->walletAddress());
+    if (exists(item->idKeyAsString())) {
+        LOG_ERROR("item already exists: " << item->idKeyAsString());
         return false;
     }
 
     boost::unique_lock<boost::shared_mutex> writerLock(m_access);
-    m_list.insert(std::make_pair(item->walletAddress(), item));
-    LOG_PRINT_L1("added supernode: " << item->walletAddress());
-    LOG_PRINT_L1("list size: " << m_list.size());
+    addImpl(item);
     return true;
+}
+
+void FullSupernodeList::addImpl(SupernodePtr item)
+{
+    m_list.insert(std::make_pair(item->idKeyAsString(), item));
+    LOG_PRINT_L1("added supernode: " << item->idKeyAsString());
+    LOG_PRINT_L1("list size: " << m_list.size());
 }
 
 size_t FullSupernodeList::loadFromDir(const string &base_dir)
 {
-    vector<string> wallets = findWallets(base_dir);
-    size_t result = 0;
-    LOG_PRINT_L1("found wallets: " << wallets.size());
-    for (const auto &wallet_path : wallets) {
-        loadWallet(wallet_path);
-    }
+//    vector<string> wallets = findWallets(base_dir);
+//    size_t result = 0;
+//    LOG_PRINT_L1("found wallets: " << wallets.size());
+//    for (const auto &wallet_path : wallets) {
+//        loadWallet(wallet_path);
+//    }
     return this->size();
 }
 
@@ -172,24 +181,24 @@ size_t FullSupernodeList::loadFromDir(const string &base_dir)
 
 size_t FullSupernodeList::loadFromDirThreaded(const string &base_dir, size_t &found_wallets)
 {
-    vector<string> wallets = findWallets(base_dir);
-    LOG_PRINT_L1("found wallets: " << wallets.size());
-    found_wallets = wallets.size();
+//    vector<string> wallets = findWallets(base_dir);
+//    LOG_PRINT_L1("found wallets: " << wallets.size());
+//    found_wallets = wallets.size();
 
-    utils::ThreadPool tp;
+//    utils::ThreadPool tp;
 
-    for (const auto &wallet_path : wallets) {
-        tp.enqueue(boost::bind<void>(&FullSupernodeList::loadWallet, this, wallet_path));
-    }
+//    for (const auto &wallet_path : wallets) {
+//        tp.enqueue(boost::bind<void>(&FullSupernodeList::loadWallet, this, wallet_path));
+//    }
 
-    tp.run();
+//    tp.run();
     return this->size();
 }
 
-bool FullSupernodeList::remove(const string &address)
+bool FullSupernodeList::remove(const string &id)
 {
-    boost::unique_lock<boost::shared_mutex> readerLock(m_access);
-    return m_list.erase(address) > 0;
+    boost::unique_lock<boost::shared_mutex> writerLock(m_access);
+    return m_list.erase(id) > 0;
 }
 
 size_t FullSupernodeList::size() const
@@ -198,24 +207,24 @@ size_t FullSupernodeList::size() const
     return m_list.size();
 }
 
-bool FullSupernodeList::exists(const string &address) const
+bool FullSupernodeList::exists(const string &id) const
 {
 
     boost::shared_lock<boost::shared_mutex> readerLock(m_access);
-    return m_list.find(address) != m_list.end();
+    return m_list.find(id) != m_list.end();
 }
 
-bool FullSupernodeList::update(const string &address, const vector<Supernode::SignedKeyImage> &key_images)
-{
+//bool FullSupernodeList::update(const string &address, const vector<Supernode::SignedKeyImage> &key_images)
+//{
 
-    boost::unique_lock<boost::shared_mutex> writerLock(m_access);
-    auto it = m_list.find(address);
-    if (it != m_list.end()) {
-        uint64_t height = 0;
-        return it->second->importKeyImages(key_images, height);
-    }
-    return false;
-}
+//    boost::unique_lock<boost::shared_mutex> writerLock(m_access);
+//    auto it = m_list.find(address);
+//    if (it != m_list.end()) {
+//        uint64_t height = 0;
+//        return it->second->importKeyImages(key_images, height);
+//    }
+//    return false;
+//}
 
 SupernodePtr FullSupernodeList::get(const string &address) const
 {
@@ -226,33 +235,69 @@ SupernodePtr FullSupernodeList::get(const string &address) const
     return SupernodePtr(nullptr);
 }
 
-bool FullSupernodeList::buildAuthSample(uint64_t height, vector<SupernodePtr> &out)
+void FullSupernodeList::selectSupernodes(size_t items_count, const std::string& payment_id, const blockchain_based_list_tier& src_array, supernode_array& dst_array)
 {
-    crypto::hash block_hash;
-    string  block_hash_str;
+    size_t src_array_size = src_array.size();
 
-    MDEBUG("building auth sample for height: " << height);
+    if (items_count > src_array_size)
+        items_count = src_array_size;
 
-    if (!getBlockHash(height - AUTH_SAMPLE_HASH_HEIGHT, block_hash_str)
-            || block_hash_str == "0000000000000000000000000000000000000000000000000000000000000000") {
-        LOG_ERROR("getBlockHash error");
-        return false;
-    }
-
-    epee::string_tools::hex_to_pod(block_hash_str, block_hash);
-
-    std::array<std::vector<SupernodePtr>, TIERS> tier_supernodes;
+    for (size_t i=0; i<src_array_size; i++)
     {
-        boost::shared_lock<boost::shared_mutex> readerLock(m_access);
-        int64_t now = static_cast<int64_t>(std::time(nullptr));
-        int64_t cutoff_time = now - ANNOUNCE_TTL_SECONDS;
-        for (const auto &sn_pair : m_list) {
-            const auto &sn = sn_pair.second;
-            const auto tier = sn->tier();
-            MTRACE("checking supernode " << sn_pair.first << ", updated: " << (now - sn->lastUpdateTime()) << "s ago"
-                   << ", tier: " << tier);
-            if (tier > 0 && sn->lastUpdateTime() >= cutoff_time)
-                tier_supernodes[tier - 1].push_back(sn);
+        auto supernode_it = m_list.find(src_array[i].supernode_public_id);
+
+        if (supernode_it == m_list.end())
+            continue;
+
+        SupernodePtr supernode = supernode_it->second;    
+        
+        size_t random_value = m_rng() % (src_array_size - i);
+
+        if (random_value >= items_count)
+            continue;
+
+        dst_array.push_back(supernode);
+
+        items_count--;
+    }
+}
+
+bool FullSupernodeList::buildAuthSample(uint64_t height, const std::string& payment_id, supernode_array &out)
+{
+    MDEBUG("building auth sample for height " << height << " and PaymentID " << payment_id);
+
+    std::array<supernode_array, TIERS> tier_supernodes;
+    {
+        blockchain_based_list_ptr blockchain_based_list = findBlockchainBasedList(height - BLOCKCHAIN_BASED_LIST_DELAY_BLOCK_COUNT);
+
+        if (!blockchain_based_list)
+        {
+            LOG_ERROR("unable to build auth sample for block height " << height << ", delay " << BLOCKCHAIN_BASED_LIST_DELAY_BLOCK_COUNT << " blocks and PaymentID "
+               << payment_id << ". Blockchain based list for this block is absent, latest block is " << getBlockchainBasedListMaxBlockNumber());
+            return false;
+        }
+
+        boost::unique_lock<boost::shared_mutex> writerLock(m_access);
+
+           //seed RNG
+ 
+        std::seed_seq seed(reinterpret_cast<const unsigned char*>(payment_id.c_str()),
+                           reinterpret_cast<const unsigned char*>(payment_id.c_str() + payment_id.size()));
+ 
+        m_rng.seed(seed);
+ 
+            //select supernodes for a full supernode list
+
+        for (size_t i=0, tiers_count=blockchain_based_list->size(); i<TIERS && i<tiers_count; i++)
+        {
+            const blockchain_based_list_tier& src_array = (*blockchain_based_list)[i];
+            supernode_array&                  dst_array = tier_supernodes[i];
+            
+            dst_array.reserve(AUTH_SAMPLE_SIZE);
+
+            selectSupernodes(AUTH_SAMPLE_SIZE, payment_id, src_array, dst_array);
+
+            MDEBUG("..." << dst_array.size() << " supernodes has been selected for tier " << i << " from blockchain based list with " << src_array.size() << " supernodes");
         }
     }
 
@@ -285,21 +330,13 @@ bool FullSupernodeList::buildAuthSample(uint64_t height, vector<SupernodePtr> &o
     out.reserve(ITEMS_PER_TIER * TIERS);
     auto out_it = back_inserter(out);
     for (int i = 0; i < TIERS; i++) {
-        std::partial_sort(
-            tier_supernodes[i].begin(), tier_supernodes[i].begin() + select[i], tier_supernodes[i].end(),
-            [&](const SupernodePtr a, const SupernodePtr b) {
-                crypto::hash hash_a, hash_b;
-                a->getScoreHash(block_hash, hash_a);
-                b->getScoreHash(block_hash, hash_b);
-                return hash_to_int256(hash_a) < hash_to_int256(hash_b);
-            });
         std::copy(tier_supernodes[i].begin(), tier_supernodes[i].begin() + select[i], out_it);
     }
 
     if (VLOG_IS_ON(2)) {
         std::string auth_sample_str, tier_sample_str;
         for (const auto &a : out) {
-            auth_sample_str += a->walletAddress() + "\n";
+            auth_sample_str += a->idKeyAsString() + "\n";
         }
         for (size_t i = 0; i < select.size(); i++) {
             if (i > 0) tier_sample_str += ", ";
@@ -309,14 +346,24 @@ bool FullSupernodeList::buildAuthSample(uint64_t height, vector<SupernodePtr> &o
         MTRACE("auth sample: \n" << auth_sample_str);
     }
 
+    if (out.size() > AUTH_SAMPLE_SIZE)
+      out.resize(AUTH_SAMPLE_SIZE);
+
+    MDEBUG("..." << out.size() << " supernodes has been selected");
+
     return out.size() == AUTH_SAMPLE_SIZE;
+}
+
+bool FullSupernodeList::buildAuthSample(const string &payment_id, FullSupernodeList::supernode_array &out)
+{
+    return buildAuthSample(getBlockchainBasedListMaxBlockNumber(), payment_id, out);
 }
 
 vector<string> FullSupernodeList::items() const
 {
+    boost::shared_lock<boost::shared_mutex> readerLock(m_access);
     vector<string> result;
     result.reserve(m_list.size());
-    boost::shared_lock<boost::shared_mutex> readerLock(m_access);
     for (auto const& it: m_list)
         result.push_back(it.first);
 
@@ -353,29 +400,120 @@ size_t FullSupernodeList::refreshedItems() const
     return m_refresh_counter;
 }
 
-bool FullSupernodeList::loadWallet(const std::string &wallet_path)
+void FullSupernodeList::updateStakeTransactions(const stake_transaction_array& stake_txs, const std::string& cryptonode_rpc_address, bool testnet)
 {
-    bool result = false;
+    MDEBUG("update stake transactions");
 
-    MDEBUG("loading wallet from: " << wallet_path);
-    Supernode * sn = Supernode::load(wallet_path, "", m_daemon_address, m_testnet);
-    if (sn)  {
-        if (!this->add(sn)) {
-            LOG_ERROR("Can't add supernode " << sn->walletAddress() << ", already exists");
-            delete sn;
-        } else {
-            MINFO("Added supernode: " << sn->walletAddress() << ", stake: " << sn->stakeAmount());
-            result = true;
+    boost::unique_lock<boost::shared_mutex> writerLock(m_access);
+
+      //clear supernode data
+
+    for (const std::unordered_map<std::string, SupernodePtr>::value_type& sn_desc : m_list)
+    {
+        SupernodePtr sn = sn_desc.second;
+
+        if (!sn)
+            continue;
+
+        sn->setStakeAmount(0);
+        sn->setStakeTransactionBlockHeight(0);
+        sn->setStakeTransactionUnlockTime(0);
+    }
+
+      //update supernodes
+
+    for (const stake_transaction& tx : stake_txs)
+    {
+        auto it = m_list.find(tx.supernode_public_id);
+
+        if (it != m_list.end())
+        {
+            SupernodePtr sn = it->second;
+
+            sn->setStakeAmount(tx.amount);
+            sn->setStakeTransactionBlockHeight(tx.block_height);
+            sn->setStakeTransactionUnlockTime(tx.unlock_time);
+        }
+        else
+        {
+            SupernodePtr sn (Supernode::createFromStakeTransaction(tx, cryptonode_rpc_address, testnet));
+
+            if (!sn)
+            {
+                LOG_ERROR("Cant create watch-only supernode wallet for id: " << tx.supernode_public_id);
+                continue;
+            }
+
+            MINFO("About to add supernode to list [" << sn << "]: " << sn->idKeyAsString());
+
+            addImpl(sn);
         }
     }
-    return result;
 }
 
+void FullSupernodeList::refreshStakeTransactionsAndBlockchainBasedList(const char* network_address, const char* address)
+{
+    m_rpc_client.send_supernode_stake_txs(network_address, address);
+    m_rpc_client.send_supernode_blockchain_based_list(network_address, address);
+}
+
+uint64_t FullSupernodeList::getBlockchainHeight() const
+{
+    uint64_t result = 0;
+    bool ret = m_rpc_client.get_height(result);
+    return ret ? result : 0;
+}
+
+void FullSupernodeList::setBlockchainBasedList(uint64_t block_number, const blockchain_based_list_ptr& list)
+{
+    boost::unique_lock<boost::shared_mutex> writerLock(m_access);
+
+    blockchain_based_list_map::iterator it = m_blockchain_based_lists.find(block_number);
+
+    if (it != m_blockchain_based_lists.end())
+    {
+        MWARNING("Overriding blockchain based list for block " << block_number);
+        it->second = list;
+        return;
+    }
+
+    m_blockchain_based_lists[block_number] = list;
+
+    if (block_number > m_blockchain_based_list_max_block_number)
+        m_blockchain_based_list_max_block_number = block_number;
+
+      //flush cache - remove old blockchain based lists
+
+    uint64_t oldest_block_number = m_blockchain_based_list_max_block_number -
+        BLOCKCHAIN_BASED_LIST_DELAY_BLOCK_COUNT - BLOCKCHAIN_BASED_LIST_HISTORY_SIZE;
+
+    for (blockchain_based_list_map::iterator it=m_blockchain_based_lists.begin(); it!=m_blockchain_based_lists.end();)
+      if (it->first < oldest_block_number) it = m_blockchain_based_lists.erase(it);
+      else                                 ++it;
+}
+
+FullSupernodeList::blockchain_based_list_ptr FullSupernodeList::findBlockchainBasedList(uint64_t block_number) const
+{
+    boost::shared_lock<boost::shared_mutex> readerLock(m_access);
+
+    blockchain_based_list_map::const_iterator it = m_blockchain_based_lists.find(block_number);
+
+    if (it == m_blockchain_based_lists.end())
+        return blockchain_based_list_ptr();
+
+    return it->second;
+}
+
+uint64_t FullSupernodeList::getBlockchainBasedListMaxBlockNumber() const
+{
+    boost::shared_lock<boost::shared_mutex> readerLock(m_access);
+    return m_blockchain_based_list_max_block_number;
+}
 
 std::ostream& operator<<(std::ostream& os, const std::vector<SupernodePtr> supernodes)
 {
     for (size_t i = 0; i  < supernodes.size(); ++i) {
-        os << supernodes[i]->walletAddress();
+        os << supernodes[i]->idKeyAsString();
         if (i < supernodes.size() - 1)
             os << ", ";
     }
