@@ -7,6 +7,7 @@
 #include "supernode/requests/send_supernode_announce.h"
 #include "rta/supernode.h"
 #include "rta/fullsupernodelist.h"
+#include "lib/graft/graft_exception.h"
 
 #include <boost/property_tree/ini_parser.hpp>
 
@@ -41,6 +42,11 @@ bool Supernode::initConfigOption(int argc, const char** argv, ConfigOpts& config
     m_configEx.stake_wallet_refresh_interval_ms = server_conf.get<size_t>("stake-wallet-refresh-interval-ms",
                                                                       consts::DEFAULT_STAKE_WALLET_REFRESH_INTERFAL_MS);
     m_configEx.stake_wallet_refresh_interval_random_factor = server_conf.get<double>("stake-wallet-refresh-interval-random-factor", 0);
+
+    if(m_configEx.common.wallet_public_address.empty())
+    {
+        throw graft::exit_error("Configuration parameter 'wallet-public-address' cannot be empty.");
+    }
     return res;
 }
 
@@ -116,35 +122,6 @@ void Supernode::initMisc(ConfigOpts& configOpts)
     auto deferred_task = [duration, this] () { std::this_thread::sleep_for(duration); this->loadStakeWallets(); };
     std::thread t(deferred_task);
     t.detach();
-
-    requestStakeTransactions();
-}
-
-void Supernode::requestStakeTransactions()
-{
-    auto handler = [](const graft::Router::vars_t& vars, const graft::Input& input, graft::Context& ctx, graft::Output& output)->graft::Status
-    {
-        graft::SupernodePtr supernode = ctx.global.get(CONTEXT_KEY_SUPERNODE, graft::SupernodePtr(nullptr));
-
-        if (!supernode.get()) {
-            LOG_ERROR("supernode is not set in global context");
-            return graft::Status::Error;
-        }
-
-        if (FullSupernodeListPtr fsl = ctx.global.get(CONTEXT_KEY_FULLSUPERNODELIST, FullSupernodeListPtr()))
-        {
-            fsl->refreshStakeTransactionsAndBlockchainBasedList(supernode->networkAddress().c_str(), supernode->idKeyAsString().c_str());
-        }
-
-        return graft::Status::Stop;
-    };
-
-    static const size_t STAKE_TRANSACTIONS_REQUEST_DELAY_MS = 1000;
-
-  getConnectionBase().getLooper().addPeriodicTask(
-                graft::Router::Handler3(nullptr, handler, nullptr),
-                std::chrono::milliseconds(STAKE_TRANSACTIONS_REQUEST_DELAY_MS)
-                );
 }
 
 void Supernode::startSupernodePeriodicTasks()
@@ -160,6 +137,32 @@ void Supernode::startSupernodePeriodicTasks()
                     m_configEx.stake_wallet_refresh_interval_random_factor
                     );
     }
+
+    // sync with cryptonode
+
+    auto handler = [](const graft::Router::vars_t& vars, const graft::Input& input, graft::Context& ctx, graft::Output& output)->graft::Status
+    {
+        graft::SupernodePtr supernode = ctx.global.get(CONTEXT_KEY_SUPERNODE, graft::SupernodePtr(nullptr));
+
+        if (!supernode.get()) {
+            LOG_ERROR("supernode is not set in global context");
+            return graft::Status::Error;
+        }
+
+        if (FullSupernodeListPtr fsl = ctx.global.get(CONTEXT_KEY_FULLSUPERNODELIST, FullSupernodeListPtr()))
+        {
+            fsl->synchronizeWithCryptonode(supernode->networkAddress().c_str(), supernode->idKeyAsString().c_str());
+        }
+
+        return graft::Status::Ok;
+    };
+
+    static const size_t CRYPTONODE_SYNCHRONIZATION_PERIOD_MS = 1000;
+
+    getConnectionBase().getLooper().addPeriodicTask(
+                graft::Router::Handler3(nullptr, handler, nullptr),
+                std::chrono::milliseconds(CRYPTONODE_SYNCHRONIZATION_PERIOD_MS)
+                );
 }
 
 void Supernode::setHttpRouters(ConnectionManager& httpcm)
