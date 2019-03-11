@@ -87,15 +87,16 @@ public:
     typedef std::vector<SupernodePtr> supernode_array;
 
     /*!
-     * \brief buildAuthSample - builds auth sample (8 supernodes) for given block height
-     * \param height          - block height used to perform selection
-     * \param payment_id      - payment id which is used for building auth sample
-     * \param out             - vector of supernode pointers
-     * \return                - true on success
+     * \brief buildAuthSample       - builds auth sample (8 supernodes) for given block height
+     * \param height                - block height used to perform selection
+     * \param payment_id            - payment id which is used for building auth sample
+     * \param out                   - vector of supernode pointers
+     * \param out_auth_block_number - block number which was used for auth sample
+     * \return                      - true on success
      */
-    bool buildAuthSample(uint64_t height, const std::string& payment_id, supernode_array &out);
+    bool buildAuthSample(uint64_t height, const std::string& payment_id, supernode_array &out, uint64_t &out_auth_block_number);
 
-    bool buildAuthSample(const std::string& payment_id, supernode_array &out);
+    bool buildAuthSample(const std::string& payment_id, supernode_array &out, uint64_t &out_auth_block_number);
 
     /*!
      * \brief items - returns address list of known supernodes
@@ -132,7 +133,7 @@ public:
      * \param              - array of stakes
      * \return
      */
-    void updateStakes(const supernode_stake_array& stakes, const std::string& cryptonode_rpc_address, bool testnet);
+    void updateStakes(uint64_t block_number, const supernode_stake_array& stakes, const std::string& cryptonode_rpc_address, bool testnet);
 
     struct blockchain_based_list_entry
     {
@@ -188,10 +189,11 @@ private:
     std::unique_ptr<utils::ThreadPool> m_tp;
     std::atomic_size_t m_refresh_counter;
     uint64_t m_blockchain_based_list_max_block_number;
+    uint64_t m_stakes_max_block_number;
     blockchain_based_list_map m_blockchain_based_lists;
     std::mt19937_64 m_rng;
-    boost::posix_time::ptime m_last_recv_stakes;
-    boost::posix_time::ptime m_last_recv_blockchain_based_list;
+    boost::posix_time::ptime m_next_recv_stakes;
+    boost::posix_time::ptime m_next_recv_blockchain_based_list;
 };
 
 using FullSupernodeListPtr = boost::shared_ptr<FullSupernodeList>;

@@ -99,6 +99,9 @@ Status handleClientPayRequest(const Router::vars_t& vars, const graft::Input& in
                         graft::Context& ctx, graft::Output& output)
 {
     MDEBUG(__FUNCTION__ << " begin");
+    // Disable pay request for RTA mining
+    return errorInternalError("Not implemented", output);
+
     PayRequestJsonRpc req;
 
     if (!input.get(req)) {
@@ -119,7 +122,8 @@ Status handleClientPayRequest(const Router::vars_t& vars, const graft::Input& in
     }
 
     std::vector<SupernodePtr> authSample;
-    if (!fsl->buildAuthSample(in.BlockNumber, in.PaymentID, authSample) || authSample.size() != FullSupernodeList::AUTH_SAMPLE_SIZE) {
+    uint64_t auth_sample_block_number = 0;
+    if (!fsl->buildAuthSample(in.BlockNumber, in.PaymentID, authSample, auth_sample_block_number) || authSample.size() != FullSupernodeList::AUTH_SAMPLE_SIZE) {
         return errorBuildAuthSample(output);
     }
 
@@ -209,7 +213,8 @@ Status handleWaitingTxReply(const Router::vars_t& vars, const graft::Input& inpu
     }
 
     std::vector<SupernodePtr> authSample;
-    if (!fsl->buildAuthSample(payData.BlockNumber, payData.PaymentID, authSample) || authSample.size() != FullSupernodeList::AUTH_SAMPLE_SIZE) {
+    uint64_t auth_sample_block_number = 0;
+    if (!fsl->buildAuthSample(payData.BlockNumber, payData.PaymentID, authSample, auth_sample_block_number) || authSample.size() != FullSupernodeList::AUTH_SAMPLE_SIZE) {
         return errorBuildAuthSample(output);
     }
 
