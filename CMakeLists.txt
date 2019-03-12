@@ -279,6 +279,11 @@ target_link_libraries(supernode_bin PRIVATE
 add_dependencies(supernode_bin graft supernode_common)
 
 
+add_executable(vanitykey ${PROJECT_SOURCE_DIR}/src/supernode/vanitykey.cpp)
+target_include_directories(vanitykey PRIVATE ${GRAFT_INCLUDE_DIRS})
+target_link_libraries(vanitykey PRIVATE graft supernode_common)
+install(TARGETS vanitykey DESTINATION bin)
+
 
 ### wallet_server
 add_executable(wallet_server
