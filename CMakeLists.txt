@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 
+set(EXTERNAL_CRYPTONODE OFF CACHE BINARY "Disables building the embedded GraftNetwork project; advanced usage only.  include/library directories to an existing build must be properly specified.")
+
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE RelWithDebInfo)
 endif(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 
-if(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+if(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo AND EXTERNAL_CRYPTONODE)
     message("==> The configuration is ${CMAKE_BUILD_TYPE}. Debug info will be extracted into separate files.")
 
     function (add_executable _name)
@@ -33,14 +35,12 @@ if(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
         endif()
     endfunction()
 
-endif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+endif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo AND EXTERNAL_CRYPTONODE)
 
 project(graft_server)
 
 option(OPT_BUILD_TESTS "Build tests." OFF)
 option(ENABLE_SYSLOG "SYSLOG support. It can be compiled for UNIX-like platforms only." OFF)
-
-set(EXTERNAL_CRYPTONODE OFF CACHE BINARY "Disables building the embedded GraftNetwork project; advanced usage only.  include/library directories to an existing build must be properly specified.")
 
 # Current GraftNetwork produces invalid results when compiled with AVX512 instructions; disable them
 add_compile_options(-mno-avx512bw -mno-avx512cd -mno-avx512dq -mno-avx512f -mno-avx512vl)
