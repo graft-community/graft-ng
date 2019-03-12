@@ -1,3 +1,9 @@
+graft-ng (0~alpha5.1+gc1-1~ubuntu18.10) cosmic; urgency=medium
+
+  * Release for Ubuntu cosmic
+
+ -- Jason Rhinelander <jason@imaginary.ca>  Tue, 12 Mar 2019 16:58:31 -0300
+
 graft-ng (0~alpha5.1+gc1-1~ubuntu18.04) bionic; urgency=medium
 
   * New release alpha5.1
