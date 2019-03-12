@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 
+set(EXTERNAL_CRYPTONODE OFF CACHE BINARY "Disables building the embedded GraftNetwork project; advanced usage only.  include/library directories to an existing build must be properly specified.")
+
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE RelWithDebInfo)
 endif(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 
-if(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+if(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo AND EXTERNAL_CRYPTONODE)
     message("==> The configuration is ${CMAKE_BUILD_TYPE}. Debug info will be extracted into separate files.")
 
     function (add_executable _name)
@@ -33,14 +35,12 @@ if(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
         endif()
     endfunction()
 
-endif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+endif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo AND EXTERNAL_CRYPTONODE)
 
 project(graft_server)
 
 option(OPT_BUILD_TESTS "Build tests." OFF)
 option(ENABLE_SYSLOG "SYSLOG support. It can be compiled for UNIX-like platforms only." OFF)
-
-set(EXTERNAL_CRYPTONODE OFF CACHE BINARY "Disables building the embedded GraftNetwork project; advanced usage only.  include/library directories to an existing build must be properly specified.")
 
 # Current GraftNetwork produces invalid results when compiled with AVX512 instructions; disable them
 add_compile_options(-mno-avx512bw -mno-avx512cd -mno-avx512dq -mno-avx512f -mno-avx512vl)
@@ -60,6 +60,11 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 
 add_definitions(-DGN_ENABLE_EVENTFD=1 -DMG_USE_READ_WRITE)
+
+option(GRAFTLET_SYSTEM_DIR "add a system directory fallback for graftlets" OFF)
+if(GRAFTLET_SYSTEM_DIR)
+    add_definitions(-DGRAFTLETS_SYSTEM_DIR=${GRAFTLET_SYSTEM_DIR})
+endif()
 
 set(GRAFT_INCLUDE_DIRS
     ${PROJECT_SOURCE_DIR}/modules/mongoose
@@ -225,7 +230,9 @@ add_library(supernode_common
     ${PROJECT_SOURCE_DIR}/src/supernode/requests/sale_status.cpp
     ${PROJECT_SOURCE_DIR}/src/supernode/requests/send_raw_tx.cpp
     ${PROJECT_SOURCE_DIR}/src/supernode/requests/send_supernode_announce.cpp
+    ${PROJECT_SOURCE_DIR}/src/supernode/requests/send_supernode_stakes.cpp
     ${PROJECT_SOURCE_DIR}/src/supernode/requests/send_transfer.cpp
+    ${PROJECT_SOURCE_DIR}/src/supernode/requests/blockchain_based_list.cpp
     ${PROJECT_SOURCE_DIR}/src/rta/DaemonRpcClient.cpp
     ${PROJECT_SOURCE_DIR}/src/rta/fullsupernodelist.cpp
     ${PROJECT_SOURCE_DIR}/src/rta/supernode.cpp
@@ -263,6 +270,7 @@ add_executable(supernode_bin
     )
 
 set_target_properties(supernode_bin PROPERTIES OUTPUT_NAME graft-supernode)
+set_target_properties(supernode_bin PROPERTIES LINK_FLAGS "-Wl,-E")
 
 target_include_directories(supernode_bin PRIVATE
     ${GRAFT_INCLUDE_DIRS}
