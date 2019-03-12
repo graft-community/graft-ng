@@ -1,3 +1,124 @@
+graft-ng (0~alpha5.1+gc1-1) unstable; urgency=medium
+
+  * New alpha 5.1 release.
+
+  [ Jason Rhinelander ]
+  * Updated submodule to latest
+
+  [ Alexander Suprunenko ]
+  * Graftlet subsystem linking fixed.
+  * CommonOpts structure added.
+  * Graftlet WalletAddress for supernode added.
+  * Signature added into GetWalletAddressResponse.
+  * Typo fixed.
+  * epee::string_tools::hex_to_pod used.
+  * class WalletAddressGraftlet renamed to WalletAddress
+
+  [ Leny Kholodov ]
+  * Stake transaction validation on supernode
+  * Adding supernode signature to stake transaction
+  * Stake transactions batch update
+  * Update stake transaction fields for RPC
+  * Move signature verification of stake transactions to cryptonode
+  * Use graft_rta_config.h with constants for RTA validation process
+  * Fix for stake transaction transfer between supernode and cryptonode
+  * Update cryptonode
+  * Remove lock from stake transactions updating
+  * Automatic update stakes for new supernodes
+  * Stake amount fix for supernode
+  * Auth sample building using blockchain based list
+
+  [ Alexander Suprunenko ]
+  * graftlet_walletAddress is being built with tests only, fixed
+
+  [ Leny Kholodov ]
+  * Update cryptonode
+  * Blockchain based list communication from cryptonode to supernode
+  * Mersenne-Twister RNG for auth sample building
+  * Supernode public wallet address in blockchain based list
+  * Auth sample building fixes
+
+  [ Ilya Kitaev ]
+  * removed libwallet supernodes
+  * fix: Supernode::createFromAnnounce
+  * debug/supernode - added public id field
+  * fix: init lastUpdateTime when creating supernode from announce
+  * fix: networkAddress restored
+
+  [ Leny Kholodov ]
+  * Update cryptonode submodule
+  * Update cryptonode module
+  * Update cryptonode module
+  * Add Supernodes to FullSupernodeList accroding to stake transactions
+  * Update cryptonode module
+  * Cryptonode module
+
+  [ Ilya Kitaev ]
+  * fix: generate auth sample for sale request
+  * fix: address -> id_key
+  * debug/auth_sample: height is output, not input
+  * updated cryptonode submodule
+  * version bump
+
+  [ Leny Kholodov ]
+  * Update cryptonode module
+  * Save several blockchain based lists on supernode
+  * Update cryptonode module
+  * Override blockchain based lists
+  * Link getBlockchainBasedListMaxBlockNumber() in buildAuthSample and resp.result.height
+
+  [ Ilya Kitaev ]
+  * fix: const_iterator -> iterator
+  * updated cryptonode submodule
+
+  [ Leny Kholodov ]
+  * Fix issue with stake trasactions update delay
+  * Additional logging for auth sample debugging
+  * Add temporary debug output for auth sample building. Aggregate supernode RTA attributes (block_number, unlock_time, stake amount) from several stake transactions
+  * Update cryptonode
+
+  [ Alexander Suprunenko ]
+  * wallet-public-address cannot be empty.
+
+  [ Ilya Kitaev ]
+  * fix: announce handling - check for empty id
+
+  [ Jason Rhinelander ]
+  * Update cryptonote submodule with minor fix
+
+  [ Ilya Kitaev ]
+  * Supernode::createFromAnnounce, Supernode::updateFromAnnounce refactored
+
+  [ Leny Kholodov ]
+  * Fix issue with zero stake amount for self supernode
+  * Add periodic batch blockchain based list update
+  * Use supernode aggregated stakes instead of stake transactions
+  * Linking blockchain based list and supernode stakes based on block number
+
+  [ Jason Rhinelander ]
+  * Increase minimum thread count to 2
+
+  [ Leny Kholodov ]
+  * Set wallet address during stakes update
+  * Add auth sample block number to buildAuthSample
+  * block_number->block_height in RPC requests. Supernode to cryptonode requests timeouts optimization. Adding block_height to stakes request from cryptonode to supernode
+
+  [ Ilya Kitaev ]
+  * Disabled "pay" request
+
+  [ Leny Kholodov ]
+  * Update cryptonode module
+
+  [ Ilya Kitaev ]
+  * Updated cryptonode submodule
+
+  [ Jason Rhinelander ]
+  * Disable add_executable/add_library for internal cryptonode
+  * Added option for install graftlets to system dir
+  * Install graftlets to system dir
+
+ -- Jason Rhinelander <jason@imaginary.ca>  Tue, 12 Mar 2019 16:35:46 -0300
+
 graft-ng (0~alpha4.2+gc1-1) unstable; urgency=medium
 
   [ Jason Rhinelander ]
