@@ -2,7 +2,7 @@ Source: graft-ng
 Section: net
 Priority: optional
 Maintainer: Jason Rhinelander <jason@imaginary.ca>
-Build-Depends: debhelper (>= 11) | dh-systemd, cmake, g++, libgraft-alpha-dev (>= 1.3.4.2+gc2), libpcre3-dev, rapidjson-dev, check, pkg-config
+Build-Depends: debhelper (>= 11) | dh-systemd, cmake, g++, libgraft-alpha-dev (>= 1.3.5.1+gc1), libpcre3-dev, rapidjson-dev, check, pkg-config
 Standards-Version: 4.1.3
 Homepage: https://github.com/graft-project/graft-ng
 
