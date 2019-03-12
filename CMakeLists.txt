@@ -61,6 +61,11 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_definitions(-DGN_ENABLE_EVENTFD=1 -DMG_USE_READ_WRITE)
 
+option(GRAFTLET_SYSTEM_DIR "add a system directory fallback for graftlets" OFF)
+if(GRAFTLET_SYSTEM_DIR)
+    add_definitions(-DGRAFTLETS_SYSTEM_DIR=${GRAFTLET_SYSTEM_DIR})
+endif()
+
 set(GRAFT_INCLUDE_DIRS
     ${PROJECT_SOURCE_DIR}/modules/mongoose
     ${r3_SOURCE_DIR}/include

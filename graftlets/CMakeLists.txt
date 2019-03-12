@@ -33,6 +33,13 @@ set_target_properties(graftlet_walletAddress PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/supernode
 )
 
+
+if(GRAFTLET_SYSTEM_DIR)
+    install(TARGETS graftlet_walletAddress
+        LIBRARY DESTINATION ${GRAFTLET_SYSTEM_DIR}
+        ARCHIVE DESTINATION ${GRAFTLET_SYSTEM_DIR})
+endif()
+
 if (OPT_BUILD_TESTS)
     message("==> Test graftlets included")
 
