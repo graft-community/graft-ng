@@ -1,3 +1,14 @@
+graft-ng (0~alpha5.1+gc2-1~ubuntu18.10) cosmic; urgency=medium
+
+  [ Leny Kholodov ]
+  * GNRTA-370: ExpiringBlock for supernode_list request
+
+  [ Jason Rhinelander ]
+  * Fix for single-core systems, part 2
+  * Fix graftlet system dir
+
+ -- Jason Rhinelander <jason@imaginary.ca>  Tue, 12 Mar 2019 23:15:33 -0300
+
 graft-ng (0~alpha5.1+gc1-1~ubuntu18.10) cosmic; urgency=medium
 
   * Release for Ubuntu cosmic
