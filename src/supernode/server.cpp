@@ -553,7 +553,7 @@ bool GraftServer::initConfigOption(int argc, const char** argv, ConfigOpts& conf
     boost::optional<std::string> dirs_opt  = graftlets_conf.get_optional<std::string>("dirs");
     details::initGraftletDirs(argc, argv, (dirs_opt)? dirs_opt.get() : "", bool(dirs_opt), configOpts.graftlet_dirs);
 #ifdef GRAFTLET_SYSTEM_DIR
-    configOpts.graftlet_dirs.emplace_back(RAPIDJSON_STRINGIFY(GRAFTLET_SYSTEM_DIR))
+    configOpts.graftlet_dirs.emplace_back(GRAFTLET_SYSTEM_DIR);
 #endif
 
     const boost::property_tree::ptree& cryptonode_conf = config.get_child("cryptonode");
