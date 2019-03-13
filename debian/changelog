@@ -1,3 +1,15 @@
+graft-ng (0~alpha5.1+gc2-1) unstable; urgency=medium
+
+  [ Leny Kholodov ]
+  * GNRTA-370: ExpiringBlock for supernode_list request
+
+  [ Jason Rhinelander ]
+  * Bump required graft-alpha version
+  * Fix for single-core systems, part 2
+  * Fix graftlet system dir
+
+ -- Jason Rhinelander <jason@imaginary.ca>  Tue, 12 Mar 2019 23:13:21 -0300
+
 graft-ng (0~alpha5.1+gc1-1) unstable; urgency=medium
 
   * New alpha 5.1 release.
