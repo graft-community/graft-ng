@@ -63,7 +63,7 @@ add_definitions(-DGN_ENABLE_EVENTFD=1 -DMG_USE_READ_WRITE)
 
 option(GRAFTLET_SYSTEM_DIR "add a system directory fallback for graftlets" OFF)
 if(GRAFTLET_SYSTEM_DIR)
-    add_definitions(-DGRAFTLETS_SYSTEM_DIR=${GRAFTLET_SYSTEM_DIR})
+    add_definitions(-DGRAFTLET_SYSTEM_DIR="${GRAFTLET_SYSTEM_DIR}")
 endif()
 
 set(GRAFT_INCLUDE_DIRS
