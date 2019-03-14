@@ -1,3 +1,9 @@
+graft-ng (0~alpha5.1+gc2-2) unstable; urgency=medium
+
+  * Properly tag version in debian package
+
+ -- Jason Rhinelander <jason@imaginary.ca>  Thu, 14 Mar 2019 12:16:46 -0300
+
 graft-ng (0~alpha5.1+gc2-1) unstable; urgency=medium
 
   [ Leny Kholodov ]
