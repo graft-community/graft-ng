@@ -7,6 +7,7 @@ override_dh_auto_configure:
 	dh_auto_configure -- -DENABLE_SYSLOG=ON \
 		-DCMAKE_CXX_FLAGS="-march=westmere -mtune=haswell -L/usr/lib/$(DEB_HOST_MULTIARCH)/graft.alpha -I/usr/include/graft.alpha" \
 		-DEXTERNAL_CRYPTONODE=ON \
+		-DDEBIAN_VERSION_SUFFIX=$(shell dpkg-parsechangelog -SVersion | sed -e 's/[^-]*-//')-graft.community \
 		-DCMAKE_INSTALL_RPATH=/usr/lib/$(DEB_HOST_MULTIARCH)/graft.alpha \
 		-DGRAFTLET_SYSTEM_DIR=/usr/lib/$(DEB_HOST_MULTIARCH)/graft-supernode/graftlets
 
