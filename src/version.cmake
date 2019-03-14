@@ -28,6 +28,11 @@
 # 
 # Parts of this file are originally copyright (c) 2012-2013 The Cryptonote developers
 
+if (DEBIAN_VERSION_SUFFIX)
+    set(VERSIONTAG "${DEBIAN_VERSION_SUFFIX}")
+    configure_file("src/version.h.in" "${TO}")
+else()
+
 # Check what commit we're on
 execute_process(COMMAND "${GIT}" rev-parse --short HEAD RESULT_VARIABLE RET OUTPUT_VARIABLE COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE)
 
@@ -61,3 +66,5 @@ else()
 
     configure_file("src/version.h.in" "${TO}")
 endif()
+
+endif() # debian version suffix
