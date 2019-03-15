@@ -1,4 +1,1 @@
-usr/bin/graft-supernode
-usr/bin/graft-wallet-server
-usr/lib/*/graft-supernode/graftlets/*
 data/config.ini /usr/share/doc/graft-supernode
