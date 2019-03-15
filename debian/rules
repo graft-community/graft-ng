@@ -1,26 +1,18 @@
 #!/usr/bin/make -f
 
 %:
-	dh $@ --buildsystem=cmake --with-systemd
+	dh $@ --buildsystem=cmake
 
 override_dh_auto_configure:
 	dh_auto_configure -- -DENABLE_SYSLOG=ON \
-		-DCMAKE_CXX_FLAGS="-march=westmere -mtune=haswell -L/usr/lib/$(DEB_HOST_MULTIARCH)/graft.alpha -I/usr/include/graft.alpha" \
+		-DCMAKE_CXX_FLAGS="-march=westmere -mtune=haswell -L/usr/lib/$(DEB_HOST_MULTIARCH)/graft.stable -I/usr/include/graft.stable" \
 		-DEXTERNAL_CRYPTONODE=ON \
-		-DDEBIAN_VERSION_SUFFIX=$(shell dpkg-parsechangelog -SVersion | sed -e 's/[^-]*-//')-graft.community \
-		-DCMAKE_INSTALL_RPATH=/usr/lib/$(DEB_HOST_MULTIARCH)/graft.alpha \
+		-DDEBIAN_VERSION_SUFFIX=$(shell dpkg-parsechangelog -SVersion | sed -e 's/[^+-]*[+-]//')-graft.community \
+		-DCMAKE_INSTALL_RPATH=/usr/lib/$(DEB_HOST_MULTIARCH)/graft.stable \
 		-DGRAFTLET_SYSTEM_DIR=/usr/lib/$(DEB_HOST_MULTIARCH)/graft-supernode/graftlets
 
 override_dh_shlibdeps:
-	dh_shlibdeps -l/usr/lib/$(DEB_HOST_MULTIARCH)/graft.alpha
+	dh_shlibdeps -l/usr/lib/$(DEB_HOST_MULTIARCH)/graft.stable
 
 override_dh_strip:
 	dh_strip --no-ddebs
-
-override_dh_installinit:
-	dh_installinit --name=graft-node-alpha
-	dh_installinit --name=graft-supernode
-
-override_dh_systemd_enable:
-	dh_systemd_enable --name=graft-node-alpha
-	dh_systemd_enable --name=graft-supernode
