@@ -9,6 +9,8 @@ find_package(Git QUIET)
 if ("$Format:$" STREQUAL "")
   # We're in a tarball; use hard-coded variables.
   write_static_version_header("release")
+elseif (DEBIAN_VERSION_SUFFIX)
+  write_static_version_header("${DEBIAN_VERSION_SUFFIX}")
 elseif (GIT_FOUND OR Git_FOUND)
   message(STATUS "Found Git: ${GIT_EXECUTABLE}")
   set(extra_output)

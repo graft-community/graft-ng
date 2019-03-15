@@ -2,34 +2,22 @@ Source: graft-ng
 Section: net
 Priority: optional
 Maintainer: Jason Rhinelander <jason@imaginary.ca>
-Build-Depends: debhelper (>= 11) | dh-systemd, cmake, g++, libgraft-alpha-dev (>= 1.3.5.1+gc2), libpcre3-dev, rapidjson-dev, check, pkg-config
+Build-Depends: debhelper (>= 11), cmake, g++, libgraft-dev (>= 1.7.0), libpcre3-dev, rapidjson-dev, check, pkg-config
 Standards-Version: 4.1.3
-Homepage: https://github.com/graft-project/graft-ng
+Homepage: https://github.com/graft-community/graft-ng
 
 Package: graft-supernode
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Recommends: graftnoded-alpha, graft-wallet-alpha
-Suggests: graft-supernode-wizard
-Description: GRAFT supernode (RTA alpha)
- This package contains the `graft_server' binary that communicates with a
- graftnoded to host a GRAFT supernode.
-
-Package: graft-supernode-wizard
-Architecture: all
-Depends: graft-supernode, graftnoded-alpha
-Description: GRAFT supernode wizard (RTA alpha)
- This package sets up a default configuration graft node and graft supernode
- running as a new 'graft-sn' user and sets them up to run automatically
- immediately (and started at boot) via systemd.
+Recommends: graftnoded
+Suggests: graft-wallet
+Description: GRAFT RTA supernode
+ This package contains the `graft-supernode' binary that communicates with a
+ graftnoded to host a GRAFT RTA supernode.
  .
- After installation, a graftnoded and supernode will be running as the
- `graft-node-alpha` and `graft-supernode` services.  These can be controlled
- using `sudo systemctl stop graft-node-alpha`,
- `sudo systemctl start graft-supernode`, and can be monitored using
- `sudo journalctl -u graft-node-alpha -af` or
- `sudo journalctl -u graft-supernode -af` or via the
- services' log files.
+ Note that the binary is instead called just `supernode` in the official
+ package.
  .
- Skip this package if you intend to configure and run the graft supernode
- yourself.
+ This package requires some configuration: in particular, you will need to copy
+ /usr/share/doc/graft-supernode/config.ini into a local directory and modify it
+ to suit your local configuration.
