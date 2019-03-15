@@ -1,3 +1,37 @@
+graft-ng (1.0.0+gc1-1) unstable; urgency=medium
+
+  * Release 1.0.0
+
+  [ Jason Rhinelander ]
+  * Increase minimum thread count to 2
+
+  [ EDDragonWolf ]
+  * Fixed version dependency for graft target
+
+  [ Jason Rhinelander ]
+  * Fix for single-core systems, part 2
+
+  [ Ilya Kitaev ]
+  * auth sample size is 8 members
+  * version bumb
+  * Updated cryptonode submodule
+  * disabled rta code
+
+  [ Alexander Suprunenko ]
+  * Check supernode availability in RTA Auth Sample
+
+  [ Ilya Kitaev ]
+  * supernode announce ttl = 5 minutes
+  * updated cryptonode submodule
+  * Revert "supernode announce ttl = 5 minutes"
+  * config: announce interval = 90 seconds
+  * Updated cryptonode branch
+
+  [ Jason Rhinelander ]
+  * Remove graft-supernode-wizard package; improve package description.
+
+ -- Jason Rhinelander <jason@imaginary.ca>  Fri, 15 Mar 2019 01:14:07 -0300
+
 graft-ng (0~alpha5.1+gc2-2) unstable; urgency=medium
 
   * Properly tag version in debian package
