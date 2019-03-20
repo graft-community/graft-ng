@@ -1,5 +1,8 @@
 #!/usr/bin/make -f
 
+# Graftlets is buggy and breaks with -Bsymbolic-functions enabled:
+export DEB_LDFLAGS_MAINT_STRIP=-Wl,-Bsymbolic-functions
+
 %:
 	dh $@ --buildsystem=cmake
 
