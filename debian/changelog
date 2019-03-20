@@ -1,3 +1,9 @@
+graft-ng (1.0.1+gc1-1~ubuntu18.04-2) bionic; urgency=medium
+
+  * Work around graftlets error under Ubuntu
+
+ -- Jason Rhinelander <jason@imaginary.ca>  Wed, 20 Mar 2019 01:03:31 -0300
+
 graft-ng (1.0.1+gc1-1~ubuntu18.04) bionic; urgency=medium
 
   [ Jason Rhinelander ]
