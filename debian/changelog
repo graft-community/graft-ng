@@ -1,3 +1,32 @@
+graft-ng (1.0.2+gc1-1) unstable; urgency=medium
+
+  [ Leny Kholodov ]
+  * Stake validation period dump
+  * Dump source blockchain based lists and the list for auth sample
+
+  [ Alexander Suprunenko ]
+  * STATIC_LINK option added
+
+  [ Ilya Kitaev ]
+  * version bump
+  * updated cryptonode submodule
+
+  [ ku4eto ]
+  * Update README.md
+
+  [ Leny Kholodov ]
+  * Build for arch x86-64
+
+  [ Ilya Kitaev ]
+  * fix: march=x86-64 for cryptonode
+
+  [ Jason Rhinelander ]
+  * Reduce debugging
+  * Lower debugging and set defaults for mainnet
+  * Remove -march=x86-64 and default STATIC_LINK to OFF
+
+ -- Jason Rhinelander <jason@imaginary.ca>  Sat, 23 Mar 2019 16:42:58 -0300
+
 graft-ng (1.0.1+gc1-1) unstable; urgency=medium
 
   [ Jason Rhinelander ]
