@@ -41,6 +41,7 @@ project(graft_server)
 
 option(OPT_BUILD_TESTS "Build tests." OFF)
 option(ENABLE_SYSLOG "SYSLOG support. It can be compiled for UNIX-like platforms only." OFF)
+option(STATIC_LINK "Link executables and libraries statically" OFF)
 
 # Current GraftNetwork produces invalid results when compiled with AVX512 instructions; disable them
 add_compile_options(-mno-avx512bw -mno-avx512cd -mno-avx512dq -mno-avx512f -mno-avx512vl)
@@ -65,6 +66,12 @@ option(GRAFTLET_SYSTEM_DIR "add a system directory fallback for graftlets" OFF)
 if(GRAFTLET_SYSTEM_DIR)
     add_definitions(-DGRAFTLET_SYSTEM_DIR="${GRAFTLET_SYSTEM_DIR}")
 endif()
+
+if(STATIC_LINK)
+    set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+    set(CMAKE_SHARED_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+    set(CMAKE_MODULE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+endif(STATIC_LINK)
 
 set(GRAFT_INCLUDE_DIRS
     ${PROJECT_SOURCE_DIR}/modules/mongoose
@@ -99,15 +106,25 @@ set(CRYPTONODE_LIBS
     cncrypto
     )
 
-set(COMMON_LIBS
-    ssl
-    crypto
-    readline
-    )
+if(STATIC_LINK)
+    set(COMMON_LIBS
+        libssl.a
+        libcrypto.a
+        libreadline.a
+        )
+else(STATIC_LINK)
+    set(COMMON_LIBS
+        ssl
+        crypto
+        readline
+        )
+endif(STATIC_LINK)
 
-#set(Boost_USE_STATIC_LIBS ON)
-#set(Boost_USE_MULTITHREADED ON)
-#set(Boost_USE_STATIC_RUNTIME ON)
+if(STATIC_LINK)
+    set(Boost_USE_STATIC_LIBS ON)
+    #set(Boost_USE_MULTITHREADED ON)
+    set(Boost_USE_STATIC_RUNTIME ON)
+endif(STATIC_LINK)
 
 find_package(Boost 1.65 QUIET REQUIRED COMPONENTS system chrono filesystem program_options serialization thread regex)
 
@@ -164,11 +181,17 @@ target_include_directories(graft PRIVATE
     ${GRAFT_INCLUDE_DIRS}
     )
 
+if(STATIC_LINK)
+    set(PCRE_LIB libpcre.a)
+else(STATIC_LINK)
+    set(PCRE_LIB pcre)
+endif(STATIC_LINK)
+
 target_link_libraries(graft PRIVATE
     r3
     lib3rdparty
     graftlet_lib
-    pcre
+    ${PCRE_LIB}
     ${CMAKE_THREAD_LIBS_INIT}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
