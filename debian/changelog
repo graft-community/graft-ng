@@ -1,3 +1,17 @@
+graft-ng (1.0.3+gc1-1) unstable; urgency=medium
+
+  [ Alexander Suprunenko ]
+  * Shutdown fixed
+
+  [ Leny Kholodov ]
+  * Change error to warning for RPC requests from supernode to cryptonode during blockchain based list and stakes synchronization
+
+  [ Ilya Kitaev ]
+  * version bump
+  * updated cryptonode submodule
+
+ -- Jason Rhinelander <jason@imaginary.ca>  Sun, 31 Mar 2019 19:07:46 -0300
+
 graft-ng (1.0.2+gc1-1) unstable; urgency=medium
 
   [ Leny Kholodov ]
