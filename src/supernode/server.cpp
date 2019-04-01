@@ -195,28 +195,30 @@ GraftServer::RunRes GraftServer::run()
     //shutdown
     int_handler = [this, &res](int sig_num)
     {
-        LOG_PRINT_L0("Stopping server");
         stop();
         res = RunRes::SignalShutdown;
     };
-
     //terminate
     term_handler = [this, &res](int sig_num)
     {
-        LOG_PRINT_L0("Force stopping server");
         stop(true);
         res = RunRes::SignalTerminate;
     };
-
     //restart
     hup_handler = [this, &res](int sig_num)
     {
-        LOG_PRINT_L0("Restarting server");
         stop();
         res = RunRes::SignalRestart;
     };
 
     serve();
+
+    switch(res)
+    {
+    case RunRes::SignalShutdown: LOG_PRINT_L0("Server shutdown"); break;
+    case RunRes::SignalTerminate: LOG_PRINT_L0("Server forced shutdown"); break;
+    case RunRes::SignalRestart: LOG_PRINT_L0("Restarting server"); break;
+    }
 
     return res;
 }
@@ -446,7 +448,17 @@ bool GraftServer::initConfigOption(int argc, const char** argv, ConfigOpts& conf
 #endif
                 ("log-format", po::value<std::string>(), "e.g. %datetime{%Y-%M-%d %H:%m:%s.%g} %level %logger %rfile %msg");
 
-        po::store(po::parse_command_line(argc, argv, desc), vm);
+        try
+        {
+            po::store(po::parse_command_line(argc, argv, desc), vm);
+        }
+        catch(std::exception& ex)
+        {
+            std::cout << "Exception : " << ex.what() << "\n";
+            usage(desc);
+            exit(EXIT_FAILURE);
+        }
+
         po::notify(vm);
 
         if (vm.count("help")) {
@@ -552,6 +564,9 @@ bool GraftServer::initConfigOption(int argc, const char** argv, ConfigOpts& conf
     const boost::property_tree::ptree& graftlets_conf = config.get_child("graftlets");
     boost::optional<std::string> dirs_opt  = graftlets_conf.get_optional<std::string>("dirs");
     details::initGraftletDirs(argc, argv, (dirs_opt)? dirs_opt.get() : "", bool(dirs_opt), configOpts.graftlet_dirs);
+#ifdef GRAFTLET_SYSTEM_DIR
+    configOpts.graftlet_dirs.emplace_back(GRAFTLET_SYSTEM_DIR);
+#endif
 
     const boost::property_tree::ptree& cryptonode_conf = config.get_child("cryptonode");
     configOpts.cryptonode_rpc_address = cryptonode_conf.get<std::string>("rpc-address");

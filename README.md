@@ -4,10 +4,12 @@
 
 ### Dependencies
 
+**Due to gcc 7.3.0 being a hard requirement, we strongly recommend to use Ubuntu 18.04 as a build platform***
+
 | Dependency     | Min. Version  | Debian/Ubuntu Pkg  | Arch Pkg       | Optional | Purpose                |
 | -------------- | ------------- | ------------------ | -------------- | -------- | ---------------------- |
-| GCC            | 4.7.3         | `build-essential`  | `base-devel`   | NO       |                        |
-| CMake          | 3.11.0        | `cmake`^           | `cmake`        | NO       |                        |
+| GCC            | 7.3.0         | `build-essential`  | `base-devel`   | NO       |                        |
+| CMake          | 3.10.2        | `cmake`^           | `cmake`        | NO       |                        |
 | pkg-config     | any           | `pkg-config`       | `base-devel`   | NO       |                        |
 | Boost          | 1.65          | `libboost-all-dev` | `boost`        | NO       | C++ libraries          |
 | OpenSSL        | basically any | `libssl-dev`       | `openssl`      | NO       |                        |
@@ -18,36 +20,31 @@
 | RapidJson      | 1.1.0         | `rapidjson-dev`    |                | NO       |                        |
 | Readline       | 7.0           | `libreadline-dev`  |                | NO       | command line interface |
 
-[^] Some Debian/Ubuntu versions (for example, Ubuntu 16.04) don't support CMake 3.11.0 from the package. To install it manually see **Install non-standard dependencies** bellow.
+[^] Some Debian/Ubuntu versions (for example, Ubuntu 16.04) don't support CMake 3.10.2 from the package. To install it manually see **Install non-standard dependencies** bellow.
 
 ### Install non-standard dependencies
 
-#### CMake 3.11.0
-Go to the download page on the CMake official site https://cmake.org/download/ and download sources (.tar.gz) or installation script (.sh) for CMake 3.11.0 or later.
+#### CMake 3.10.2
+Go to the download page on the CMake official site https://cmake.org/download/ and download sources (.tar.gz) or installation script (.sh) for CMake 3.10.2 or later.
 
 If you downloaded sources, unpack them and follow the installation instruction from CMake. If you downloaded installation script, run following command to install CMake:
 
 ```bash
-sudo /bin/sh cmake-3.11.1-Linux-x86_64.sh --prefix=/opt/cmake --skip-license
+sudo /bin/sh cmake-3.10.2-Linux-x86_64.sh --prefix=/opt/cmake --skip-license
 ```
 
 If you don't want to download the installation script manually, you can simply run following command from the command line (it requires curl and you must accept license by yourself):
 
 ```bash
-curl -s https://cmake.org/files/v3.11/cmake-3.11.1-Linux-x86_64.sh | bash -e
+curl -s https://cmake.org/files/v3.12/cmake-3.10.2-Linux-x86_64.sh | bash -e
 ```
+
 ### Prepare sources
 
 Clone repository:
 
 ```bash
-git clone https://github.com/graft-project/graft-ng.git
-```
-Initialize and update submodules:
-
-```bash
-git submodule init
-git submodule update --recursive
+git clone --recurse-submodules https://github.com/graft-project/graft-ng.git
 ```
 
 ### Build instructions
@@ -68,8 +65,8 @@ If you want to build unit test suit as well, run *cmake* with additional paramet
 ```bash
 mkdir -p <build directory>
 cd <build directory>
-cmake  <project root> -DOPT_BUILD_TEST
-make --all
+cmake  <project root> -DOPT_BUILD_TESTS=ON
+make all
 ```
 
 Then execute *graft_server_test* to run the tests.
